@@ -34,7 +34,7 @@ public class CalcMacro extends InlineMacroProcessor {
   }
 
 //  @Override
-  public Object aprocess(ContentNode parent, String target, Map<String, Object> attributes) {
+  public Object myprocess(ContentNode parent, String target, Map<String, Object> attributes) {
     String calcResult = calculate(target);
 
     Map<String, Object> options = new HashMap<>();
