@@ -4,7 +4,7 @@
 
   <groupId>com.lealceldeiro</groupId>
   <artifactId>asciidoc-extensions</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
   <packaging>jar</packaging>
 
   <name>asciidoc-extensions</name>
@@ -135,6 +135,7 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
           <waitUntil>published</waitUntil>
         </configuration>
       </plugin>
