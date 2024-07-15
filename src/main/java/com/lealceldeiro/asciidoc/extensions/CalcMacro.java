@@ -20,26 +20,11 @@ public class CalcMacro extends InlineMacroProcessor {
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
-    String href =
-        new StringBuilder()
-            .append("https://github.com/")
-            .append(attributes.get("repo"))
-            .append("/issues/")
-            .append(target).toString();
-
-    Map<String, Object> options = new HashMap<>();
-    options.put("type", ":link");
-    options.put("target", href);
-    return createPhraseNode(parent, "anchor", target, attributes, options);
-  }
-
-//  @Override
-  public Object myprocess(ContentNode parent, String target, Map<String, Object> attributes) {
     String calcResult = calculate(target);
 
     Map<String, Object> options = new HashMap<>();
 
-    return createPhraseNode(parent,"text", calcResult, options);
+    return createPhraseNode(parent, "text", calcResult, options);
   }
 
   private String calculate(String operation) {
