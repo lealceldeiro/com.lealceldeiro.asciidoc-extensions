@@ -12,8 +12,11 @@
   <description>Asciidoc extensions written in Java</description>
 
   <properties>
-    <gpg.keyname>0xC0DDD34A</gpg.keyname>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <java.version>11</java.version>
+    <gpg.keyname>0xC0DDD34A</gpg.keyname>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <asciidoctorj.version>2.5.13</asciidoctorj.version>
     <junit.version>4.13.2</junit.version>
