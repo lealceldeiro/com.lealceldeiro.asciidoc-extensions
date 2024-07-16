@@ -1,6 +1,7 @@
 package com.lealceldeiro.asciidoc.extensions;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -57,18 +58,25 @@ public class CalcMacro extends InlineMacroProcessor {
       return NOT_A_NUMBER;
     }
 
+    BigDecimal value = null;
     switch (operation) {
       case SUM:
-        return calc(numbers, BigDecimal::add);
+        value = calc(numbers, BigDecimal::add);
+        break;
       case SUB:
-        return calc(numbers, BigDecimal::subtract);
+        value = calc(numbers, BigDecimal::subtract);
+        break;
       case MULTIPLY:
-        return calc(numbers, BigDecimal::multiply);
+        value = calc(numbers, BigDecimal::multiply);
+        break;
       case DIVIDE:
-        return calc(numbers, BigDecimal::divide);
+        value = calc(numbers, BigDecimal::divide);
+        break;
     }
 
-    return NOT_AN_OPERATION;
+    return value != null
+           ? value.setScale(2, RoundingMode.CEILING).toString()
+           : NOT_AN_OPERATION;
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
@@ -98,7 +106,7 @@ public class CalcMacro extends InlineMacroProcessor {
     return Optional.of(new BigDecimal(String.valueOf(value)));
   }
 
-  private String calc(Collection<BigDecimal> attributes, BinaryOperator<BigDecimal> operation) {
-    return attributes.stream().reduce(operation).orElse(BigDecimal.ZERO).toString();
+  private BigDecimal calc(Collection<BigDecimal> numbers, BinaryOperator<BigDecimal> operation) {
+    return numbers.stream().reduce(operation).orElse(BigDecimal.ZERO);
   }
 }
