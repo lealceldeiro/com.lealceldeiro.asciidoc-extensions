@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.lealceldeiro</groupId>
   <artifactId>asciidoc-extensions</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
   <packaging>jar</packaging>
 
   <name>asciidoc-extensions</name>
@@ -24,6 +25,7 @@
     <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+    <MathParser.org-mXparser.version>6.0.0</MathParser.org-mXparser.version>
   </properties>
 
   <organization>
@@ -38,7 +40,9 @@
       <name>Asiel Leal Celdeiro</name>
       <id>lealceldeiro</id>
       <email>asiel@lealceldeiro.com</email>
-      <roles><role>Lead Developer</role></roles>
+      <roles>
+        <role>Lead Developer</role>
+      </roles>
       <organization>lealceldeiro.com</organization>
     </developer>
   </developers>
@@ -52,19 +56,26 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions.git</connection>
-    <developerConnection>scm:git:https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions.git
+    <connection>scm:git:git://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions.git
+    </connection>
+    <developerConnection>
+      scm:git:https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions.git
     </developerConnection>
     <url>https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions</url>
     <tag>com.lealceldeiro.asciidoc-extensions-${project.version}</tag>
   </scm>
 
   <dependencies>
-      <dependency>
-        <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctorj</artifactId>
-        <version>${asciidoctorj.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>org.asciidoctor</groupId>
+      <artifactId>asciidoctorj</artifactId>
+      <version>${asciidoctorj.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mariuszgromada.math</groupId>
+      <artifactId>MathParser.org-mXparser</artifactId>
+      <version>${MathParser.org-mXparser.version}</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
