@@ -53,7 +53,7 @@ public class CalcMacro extends InlineMacroProcessor {
       logDebug("Ignoring invalid attributes");
     }
 
-    Collection<BigDecimal> numbers = getNumbers(attributes, ignoreInvalid);
+    Collection<BigDecimal> numbers = getNumbers(attributes);
     if (!ignoreInvalid && (numbers.size() != (attributes.size() - NUMBER_OF_POSITION_ATTRIBUTES))) {
       return NOT_A_NUMBER;
     }
@@ -84,12 +84,12 @@ public class CalcMacro extends InlineMacroProcessor {
            && IGNORE_INVALID.equals(String.valueOf(attributes.get(MODE)));
   }
 
-  private Collection<BigDecimal> getNumbers(Map<String, Object> attributes, boolean ignoreInvalid) {
+  private Collection<BigDecimal> getNumbers(Map<String, Object> attributes) {
     return attributes.entrySet()
                      .stream()
                      .filter(entry -> !MODE.equals(entry.getKey()))
                      .map(Map.Entry::getValue)
-                     .map(value -> getBigDecimal(value, ignoreInvalid))
+                     .map(this::getBigDecimal)
                      .filter(Optional::isPresent)
                      .map(Optional::get)
                      .collect(Collectors.toList());
@@ -99,11 +99,15 @@ public class CalcMacro extends InlineMacroProcessor {
     log(new LogRecord(Severity.DEBUG, message));
   }
 
-  private Optional<BigDecimal> getBigDecimal(Object value, boolean ignoreInvalid) {
+  private Optional<BigDecimal> getBigDecimal(Object value) {
     if (value == null) {
-      return ignoreInvalid ? Optional.of(BigDecimal.ZERO) : Optional.empty();
+      return Optional.empty();
     }
-    return Optional.of(new BigDecimal(String.valueOf(value)));
+    try {
+      return Optional.of(new BigDecimal(String.valueOf(value)));
+    } catch (NullPointerException | NumberFormatException e) {
+      return Optional.empty();
+    }
   }
 
   private BigDecimal calc(Collection<BigDecimal> numbers, BinaryOperator<BigDecimal> operation) {
