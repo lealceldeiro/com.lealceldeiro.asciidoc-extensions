@@ -161,10 +161,10 @@ Getting the legal bits out of our way, let's see how it can be used.
 For this macro to work for you, the document in which it's used must contain a valid author
 (Asciidoc [`:author:`](https://docs.asciidoctor.org/asciidoc/latest/document/reference-author-attributes/#reference-author) attribute).
 Optionally, the `author` macro attribute can be provided instead of using the document attribute.
-In botch cases, it must be a value with length greater than 5 characters.
+In both cases, it must be a value with length greater than 5 characters.
 See some examples below.
 
-If there isn't such a valid value for this attribute you'll get `NaA` as a result.
+If there isn't such a valid value for this attribute you'll get `NaA` or `NaVA` as a result.
 
 There's a second mandatory value that you must provide: `calc_exp_license_type`, which can be
 either `commercial` or `non_commercial`.
