@@ -28,6 +28,7 @@ import org.asciidoctor.log.Severity;
 public class CalcDateMacro extends InlineMacroProcessor {
   public static final String NOT_A_NUMBER = "NaN";
   public static final String NOT_A_DATE = "NaD";
+  public static final String NOT_AN_OPERATION = "NaO";
   public static final String NOT_A_FORMAT = "NaF";
   public static final String SUM = "sum";
   public static final String SUB = "sub";
@@ -58,24 +59,31 @@ public class CalcDateMacro extends InlineMacroProcessor {
     }
 
     Optional<LocalDate> optionalDate = getDate(attributes, ignoreInvalid);
-    Optional<Long> optionalAmount = getAmount(attributes, ignoreInvalid);
-    Optional<DateTimeFormatter> optionalFormatter = getFormat(attributes, ignoreInvalid);
-    TemporalUnit unit = getTemporalUnit(attributes);
-
     if (optionalDate.isEmpty()) {
       return NOT_A_DATE;
     }
+
+    Optional<Long> optionalAmount = getAmount(attributes, ignoreInvalid);
     if (optionalAmount.isEmpty()) {
       return NOT_A_NUMBER;
     }
-    if (optionalFormatter.isEmpty()) {
+
+    String rawTargetFormat = getRawTargetFormat(attributes);
+    Optional<DateTimeFormatter> optionalTargetFormat = getTargetFormat(rawTargetFormat, ignoreInvalid);
+    if (!ignoreInvalid && optionalTargetFormat.isEmpty() && rawTargetFormat != null) {
       return NOT_A_FORMAT;
     }
 
+    DateTimeFormatter formatter
+        = optionalTargetFormat.orElse(DateTimeFormatter.ISO_LOCAL_DATE);
+    TemporalUnit unit = getTemporalUnit(attributes);
+
     LocalDate date = optionalDate.get();
     long amount = optionalAmount.get();
-    DateTimeFormatter formatter = optionalFormatter.get();
-    logDebug("Performing " + operation + " on date: " + date + " with amount: " + amount + " and formatter: " + formatter);
+    logDebug("Performing " + operation
+             + " on date: " + date
+             + " with amount: " + amount
+             + " and formatter: " + formatter);
 
     switch (operation) {
       case SUM:
@@ -84,7 +92,7 @@ public class CalcDateMacro extends InlineMacroProcessor {
         return formatter.format(date.minus(amount, unit));
     }
 
-    return NOT_A_DATE;
+    return NOT_AN_OPERATION;
   }
 
   private void logDebug(String message) {
@@ -122,15 +130,18 @@ public class CalcDateMacro extends InlineMacroProcessor {
     return getLong(valueString, ignoreInvalid);
   }
 
-  private Optional<DateTimeFormatter> getFormat(Map<String, Object> attr, boolean ignoreInvalid) {
+  private String getRawTargetFormat(Map<String, Object> attr) {
     String value = String.valueOf(attr.containsKey(FORMAT_KEY)
                                   ? attr.get(FORMAT_KEY)
                                   : attr.get("3"));
     logDebug("Raw format: " + value);
+    return value;
+  }
 
+  private Optional<DateTimeFormatter> getTargetFormat(String rawFormat, boolean ignoreInvalid) {
     DateTimeFormatter dateTimeFormatter = null;
     try {
-      dateTimeFormatter = DateTimeFormatter.ofPattern(value, Locale.ENGLISH);
+      dateTimeFormatter = DateTimeFormatter.ofPattern(rawFormat, Locale.ENGLISH);
     } catch (NullPointerException | IllegalArgumentException | DateTimeParseException e) {
       if (ignoreInvalid) {
         dateTimeFormatter = DateTimeFormatter.ISO_DATE;
