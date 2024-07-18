@@ -3,6 +3,33 @@
 This project was born from my need to evaluate some simple expressions within Asciidoc files and
 output their results in the final generated document.
 
+It's intended to be used along with the
+[Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/).
+
+## Adding it to your project
+
+Add the dependency to your `pom.xml` file as follows:
+
+```xml
+<dependency>
+    <groupId>com.lealceldeiro</groupId>
+    <artifactId>asciidoc-extensions</artifactId>
+    <version>asciidoc-extensions.version</version>
+</dependency>
+```
+
+To check what's the latest version you can use, as well as for other build tools,
+please check https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions
+
+That's it,
+the macros will be registered automatically for you
+once the dependency is in your project's classpath.
+
+For more info on how it is automatically registered for you,
+please check the [Maven Plugin Configuration section](https://docs.asciidoctor.org/maven-tools/latest/plugin/goals/process-asciidoc/#configuration)
+and [AsciidoctorJ's Extension API](https://docs.asciidoctor.org/asciidoctorj/latest/extensions/register-extensions-automatically/).
+
+## The macros
 So far it includes three inline macros:
 
 - `calc`
@@ -137,7 +164,7 @@ When it's used, any invalid value will be replaced as follows:
 This macro is a wrapper around https://mathparser.org/. This means the actual logic to
 calculate whatever expression is passed to the macro is performed by https://mathparser.org/
 
-Before continue reading, it's important that you understand that this software does NOT grant
+Before continue reading, it's important that you understand that this software doesn’t grant
 you any type of license for use of https://mathparser.org/.
 
 While this software is [licensed under MIT](./LICENSE),
@@ -149,7 +176,7 @@ and read [their license](https://mathparser.org/mxparser-license/) before using 
 
 In short, if you're obliged to purchase a license from https://mathparser.org/ because of the
 final use you'll give to their, or this, software; then you must do so because (as stated before)
-the use of this library does NOT grant you any rights over https://mathparser.org/.
+the use of this library doesn’t grant you any rights over https://mathparser.org/.
 
 Likewise, if you import this dependency in you project, but don't plan to use the `calc_exp` macro,
 you don't have to worry about any of this.
@@ -170,9 +197,9 @@ There's a second mandatory value that you must provide: `calc_exp_license_type`,
 either `commercial` or `non_commercial`.
 This value can be provided directly as an attribute for the macro, or at the document level.
 
-- `non_commercial`: indicates that you have NOT purchased any license for commercial use,
+- `non_commercial`: indicates that you haven’t purchased any license for commercial use,
   from https://mathparser.org/ and that you plan to use it for non-commercial purposes.
-- `commercial`: indicates that you have purchased a license for commercial use,
+- `commercial`: indicates that you’ve purchased a license for commercial use,
 from https://mathparser.org/
 
 If there isn't any valid value provided for this attribute you'll get a `NaL` as a result.
