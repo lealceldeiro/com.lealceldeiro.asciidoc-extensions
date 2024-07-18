@@ -6,6 +6,8 @@ on:
 
 jobs:
   build-and-publish:
+    name: Build & Publish
+    if: ${{ !endsWith(github.event.head_commit.message, '[skip-ci]') }}
 
     runs-on: ubuntu-latest
     permissions:
