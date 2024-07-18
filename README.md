@@ -14,7 +14,7 @@ Add the dependency to your `pom.xml` file as follows:
 <dependency>
     <groupId>com.lealceldeiro</groupId>
     <artifactId>asciidoc-extensions</artifactId>
-    <version>asciidoc-extensions.version</version>
+    <version>${asciidoc-extensions.version}</version>
 </dependency>
 ```
 
