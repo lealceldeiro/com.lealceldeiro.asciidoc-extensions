@@ -132,6 +132,114 @@ When it's used, any invalid value will be replaced as follows:
 
 ## `calc_exp`
 
+### Important License Notice
+
+This macro is a wrapper around https://mathparser.org/. This means the actual logic to
+calculate whatever expression is passed to the macro is performed by https://mathparser.org/
+
+Before continue reading, it's important that you understand that this software does NOT grant
+you any type of license for use of https://mathparser.org/.
+
+While this software is [licensed under MIT](./LICENSE),
+https://mathparser.org/ has its own License Agreement,
+Terms and Conditions, etc., to which you must adhere.
+
+I kindly ask you to take 5 minutes
+and read [their license](https://mathparser.org/mxparser-license/) before using this macro.
+
+In short, if you're obliged to purchase a license from https://mathparser.org/ because of the
+final use you'll give to their, or this, software; then you must do so because (as stated before)
+the use of this library does NOT grant you any rights over https://mathparser.org/.
+
+Likewise, if you import this dependency in you project, but don't plan to use the `calc_exp` macro,
+you don't have to worry about any of this.
+
+### Usage
+
+Getting the legal bits out of our way, let's see how it can be used.
+
+For this macro to work for you, the document in which it's used must contain a valid author
+(Asciidoc [`:author:`](https://docs.asciidoctor.org/asciidoc/latest/document/reference-author-attributes/#reference-author) attribute).
+Optionally, the `author` macro attribute can be provided instead of using the document attribute.
+In botch cases, it must be a value with length greater than 5 characters.
+See some examples below.
+
+If there isn't such a valid value for this attribute you'll get `NaA` as a result.
+
+There's a second mandatory value that you must provide: `calc_exp_license_type`, which can be
+either `commercial` or `non_commercial`.
+This value can be provided directly as an attribute for the macro, or at the document level.
+
+- `non_commercial`: indicates that you have NOT purchased any license for commercial use,
+  from https://mathparser.org/ and that you plan to use it for non-commercial purposes.
+- `commercial`: indicates that you have purchased a license for commercial use,
+from https://mathparser.org/
+
+If there isn't any valid value provided for this attribute you'll get a `NaL` as a result.
+
+These two values are used to acknowledge that you comply with the license agreement from
+https://mathparser.org/.
+See more at https://mathparser.org/mxparser-tutorial/confirming-non-commercial-commercial-use/
+
+Example, setting the author and license type at the document level:
+
+```asciidoc
+= My Document
+Asiel Leal_Celdeiro
+
+:calc_exp_license_type: non_commercial
+
+// outputs 1.00
+calc_exp:[1 ^ 2]
+```
+
+Example, setting the author and license type at the macro level:
+
+```asciidoc
+= My Document
+
+// outputs 9.00
+calc_exp:[exp=3 ^ 2, author=Johnny, calc_exp_license_type=commercial]
+```
+
+### Invalid values
+
+If there's an invalid `author` value a `NaA` is returned.
+A special case is when
+the value is shorter than `5` characters, where you get a `NaVA` (this
+special case is due to the underlying library)
+
+Example:
+
+```asciidoc
+// outputs NaA: if the document-level author is null or invalid
+calc_exp:[exp=3 ^ 2, calc_exp_license_type=non_commercial]
+```
+
+```asciidoc
+// outputs NaVA
+calc_exp:[exp=3 ^ 2, author=John, calc_exp_license_type=non_commercial]
+```
+
+If there's an invalid value for `calc_exp_license_type`,
+then a `NaL` is reported.
+Example:
+
+
+```asciidoc
+// outputs NaL
+calc_exp:[exp=3 ^ 2, author=Johnny, calc_exp_license_type=testing]
+```
+
+If there's a failure while trying to evaluate the expression
+then there's an `NaE` returned.
+Example:
+
+```asciidoc
+// outputs NaE
+calc_exp:[exp=3 ^, author=Johnny, calc_exp_license_type=non_commercial]
+```
+
 ## Limitations
 
 For the time being,
