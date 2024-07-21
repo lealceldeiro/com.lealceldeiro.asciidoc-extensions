@@ -1,10 +1,12 @@
 # com.lealceldeiro.asciidoc-extensions
 
-This project was born from my need to evaluate some simple expressions within Asciidoc files and
+This project was born from my need to evaluate some simple mathematical expressions
+within Asciidoc files and
 output their results in the final generated document.
 
 It's intended to be used along with the
-[Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/).
+[Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/) or a similar
+tool that allows importing this dependency as an Asciidoctor Java extension.
 
 ## Adding it to your project
 
@@ -25,7 +27,7 @@ That's it,
 the macros will be registered automatically for you
 once the dependency is in your project's classpath.
 
-For more info on how it is automatically registered for you,
+For more info on how it's automatically registered for you,
 please check the [Maven Plugin Configuration section](https://docs.asciidoctor.org/maven-tools/latest/plugin/goals/process-asciidoc/#configuration)
 and [AsciidoctorJ's Extension API](https://docs.asciidoctor.org/asciidoctorj/latest/extensions/register-extensions-automatically/).
 
