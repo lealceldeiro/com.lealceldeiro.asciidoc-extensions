@@ -1,5 +1,7 @@
 # com.lealceldeiro.asciidoc-extensions
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions)
+
 This project was born from my need to evaluate some simple mathematical expressions
 within Asciidoc files and
 output their results in the final generated document.
