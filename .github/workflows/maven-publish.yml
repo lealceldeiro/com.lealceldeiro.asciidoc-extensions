@@ -42,15 +42,11 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Build and analyze
+    - name: Build, analyze and publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
-
-    - name: Publish to Maven Central Repository
-      run: mvn deploy
-      env:
         MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar deploy -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
