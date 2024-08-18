@@ -18,10 +18,10 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-    - name: Set up JDK 11
+    - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'zulu'
         server-id: central
         server-username: MAVEN_USERNAME
@@ -43,9 +43,7 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
 
     - name: Build, analyze and publish to Maven Central Repository
-      # Use sonar when project can go to Java 17
-      # run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar deploy -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
-      run: mvn deploy
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar deploy -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
