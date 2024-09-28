@@ -1,4 +1,4 @@
-package com.lealceldeiro.asciidoc.extensions;
+package com.lealceldeiro.asciidoc.extensions.calcexpression;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

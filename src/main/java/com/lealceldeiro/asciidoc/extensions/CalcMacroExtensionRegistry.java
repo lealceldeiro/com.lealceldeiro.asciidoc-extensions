@@ -1,5 +1,6 @@
 package com.lealceldeiro.asciidoc.extensions;
 
+import com.lealceldeiro.asciidoc.extensions.calc.CalcMacro;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.extension.JavaExtensionRegistry;
 import org.asciidoctor.jruby.extension.spi.ExtensionRegistry;

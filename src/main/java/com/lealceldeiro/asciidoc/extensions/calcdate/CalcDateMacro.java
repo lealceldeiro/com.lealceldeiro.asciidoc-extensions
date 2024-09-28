@@ -1,4 +1,4 @@
-package com.lealceldeiro.asciidoc.extensions;
+package com.lealceldeiro.asciidoc.extensions.calcdate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

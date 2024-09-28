@@ -1,5 +1,7 @@
-package com.lealceldeiro.asciidoc.extensions;
+package com.lealceldeiro.asciidoc.extensions.calc;
 
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -12,8 +14,6 @@ import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
 import org.asciidoctor.extension.Name;
 import org.asciidoctor.extension.PositionalAttributes;
-import org.asciidoctor.log.LogRecord;
-import org.asciidoctor.log.Severity;
 
 /**
  * Docs at
@@ -23,7 +23,9 @@ import org.asciidoctor.log.Severity;
  */
 @Name("calc")
 @PositionalAttributes("mode")
-public class CalcMacro extends InlineMacroProcessor {
+public class CalcMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
+  private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
+
   public static final String NOT_A_NUMBER = "NaN";
   public static final String NOT_AN_OPERATION = "NaO";
   public static final String SUM = "sum";
@@ -33,7 +35,6 @@ public class CalcMacro extends InlineMacroProcessor {
 
   public static final String MODE = "mode";
   public static final String IGNORE_INVALID = "ignore_invalid";
-  public static final int NUMBER_OF_POSITION_ATTRIBUTES = 1;
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
@@ -44,17 +45,19 @@ public class CalcMacro extends InlineMacroProcessor {
     return createPhraseNode(parent, "quoted", calcResult, Collections.emptyMap());
   }
 
-  private String calculate(String operation, Map<String, Object> attributes) {
-    logDebug("Operation: " + operation);
-    logDebug("Attributes: " + attributes);
+  @Override
+  public String calculate(String operation, Map<String, Object> attributes) {
+    logger.log(this, "Operation: " + operation);
+    logger.log(this, "Attributes: " + attributes);
 
     boolean ignoreInvalid = ignoreInvalid(attributes);
     if (ignoreInvalid) {
-      logDebug("Ignoring invalid attributes");
+      logger.log(this, "Ignoring invalid attributes");
     }
 
     Collection<BigDecimal> numbers = getNumbers(attributes);
-    if (!ignoreInvalid && (numbers.size() != (attributes.size() - NUMBER_OF_POSITION_ATTRIBUTES))) {
+    var expectedNumbersCount = attributes.size() - positionalAttributesCount(attributes);
+    if (!ignoreInvalid && numbers.size() != expectedNumbersCount) {
       return NOT_A_NUMBER;
     }
 
@@ -79,6 +82,10 @@ public class CalcMacro extends InlineMacroProcessor {
            : NOT_AN_OPERATION;
   }
 
+  private static int positionalAttributesCount(Map<String, Object> attributes) {
+    return attributes.containsKey(MODE) ? 1 : 0;
+  }
+
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
     return attributes.containsKey(MODE)
            && IGNORE_INVALID.equals(String.valueOf(attributes.get(MODE)));
@@ -93,10 +100,6 @@ public class CalcMacro extends InlineMacroProcessor {
                      .filter(Optional::isPresent)
                      .map(Optional::get)
                      .collect(Collectors.toList());
-  }
-
-  private void logDebug(String message) {
-    log(new LogRecord(Severity.DEBUG, message));
   }
 
   private Optional<BigDecimal> getBigDecimal(Object value) {
