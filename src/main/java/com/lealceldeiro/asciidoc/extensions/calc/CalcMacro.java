@@ -1,6 +1,7 @@
 package com.lealceldeiro.asciidoc.extensions.calc;
 
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
@@ -29,9 +30,6 @@ import org.asciidoctor.extension.PositionalAttributes;
 public class CalcMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
 
-  public static final String MODE = "mode";
-  public static final String IGNORE_INVALID = "ignore_invalid";
-
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
     String calcResult = calculate(target, attributes);
@@ -57,7 +55,7 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
       return InvalidValue.NOT_A_NUMBER;
     }
 
-    Optional<BigDecimal> value = Optional.empty();
+    Optional<BigDecimal> value;
     switch (operator) {
       case Operator.SUM:
         value = calc(numbers, BigDecimal::add);
@@ -81,18 +79,18 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
   }
 
   private static int positionalAttributesCount(Map<String, Object> attributes) {
-    return attributes.containsKey(MODE) ? 1 : 0;
+    return attributes.containsKey(Macro.Key.MODE) ? 1 : 0;
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
-    return attributes.containsKey(MODE)
-           && IGNORE_INVALID.equals(String.valueOf(attributes.get(MODE)));
+    return attributes.containsKey(Macro.Key.MODE)
+           && Macro.Value.IGNORE_INVALID.equals(String.valueOf(attributes.get(Macro.Key.MODE)));
   }
 
   private List<BigDecimal> getNumbers(Map<String, Object> attributes) {
     return attributes.entrySet()
                      .stream()
-                     .filter(entry -> !MODE.equals(entry.getKey()))
+                     .filter(entry -> !Macro.Key.MODE.equals(entry.getKey()))
                      .filter(entry -> isIntValue(entry.getKey()))
                      .sorted((entry1, entry2) -> {
                        int key1 = Integer.parseInt(entry1.getKey());
