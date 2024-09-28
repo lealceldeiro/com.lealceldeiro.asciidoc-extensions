@@ -1,11 +1,14 @@
 package com.lealceldeiro.asciidoc.extensions.calc;
 
+import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -26,13 +29,6 @@ import org.asciidoctor.extension.PositionalAttributes;
 public class CalcMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
 
-  public static final String NOT_A_NUMBER = "NaN";
-  public static final String NOT_AN_OPERATION = "NaO";
-  public static final String SUM = "sum";
-  public static final String SUB = "sub";
-  public static final String MULTIPLY = "multiply";
-  public static final String DIVIDE = "divide";
-
   public static final String MODE = "mode";
   public static final String IGNORE_INVALID = "ignore_invalid";
 
@@ -46,8 +42,8 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
   }
 
   @Override
-  public String calculate(String operation, Map<String, Object> attributes) {
-    logger.log(this, "Operation: " + operation);
+  public String calculate(String operator, Map<String, Object> attributes) {
+    logger.log(this, "Operator: " + operator);
     logger.log(this, "Attributes: " + attributes);
 
     boolean ignoreInvalid = ignoreInvalid(attributes);
@@ -55,31 +51,33 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
       logger.log(this, "Ignoring invalid attributes");
     }
 
-    Collection<BigDecimal> numbers = getNumbers(attributes);
-    var expectedNumbersCount = attributes.size() - positionalAttributesCount(attributes);
+    List<BigDecimal> numbers = getNumbers(attributes);
+    int expectedNumbersCount = attributes.size() - positionalAttributesCount(attributes);
     if (!ignoreInvalid && numbers.size() != expectedNumbersCount) {
-      return NOT_A_NUMBER;
+      return InvalidValue.NOT_A_NUMBER;
     }
 
-    BigDecimal value = null;
-    switch (operation) {
-      case SUM:
+    Optional<BigDecimal> value = Optional.empty();
+    switch (operator) {
+      case Operator.SUM:
         value = calc(numbers, BigDecimal::add);
         break;
-      case SUB:
+      case Operator.SUB:
         value = calc(numbers, BigDecimal::subtract);
         break;
-      case MULTIPLY:
+      case Operator.MULTIPLY:
         value = calc(numbers, BigDecimal::multiply);
         break;
-      case DIVIDE:
+      case Operator.DIVIDE:
         value = calc(numbers, BigDecimal::divide);
         break;
+      default:
+        return InvalidValue.NOT_AN_OPERATION;
     }
 
-    return value != null
-           ? value.setScale(2, RoundingMode.CEILING).toString()
-           : NOT_AN_OPERATION;
+    return value.map(val -> val.setScale(2, RoundingMode.CEILING))
+                .map(BigDecimal::toString)
+                .orElse(InvalidValue.NOT_A_VALID_MATH);
   }
 
   private static int positionalAttributesCount(Map<String, Object> attributes) {
@@ -91,15 +89,30 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
            && IGNORE_INVALID.equals(String.valueOf(attributes.get(MODE)));
   }
 
-  private Collection<BigDecimal> getNumbers(Map<String, Object> attributes) {
+  private List<BigDecimal> getNumbers(Map<String, Object> attributes) {
     return attributes.entrySet()
                      .stream()
                      .filter(entry -> !MODE.equals(entry.getKey()))
+                     .filter(entry -> isIntValue(entry.getKey()))
+                     .sorted((entry1, entry2) -> {
+                       int key1 = Integer.parseInt(entry1.getKey());
+                       int key2 = Integer.parseInt(entry2.getKey());
+                       return key1 - key2;
+                     })
                      .map(Map.Entry::getValue)
                      .map(this::getBigDecimal)
                      .filter(Optional::isPresent)
                      .map(Optional::get)
                      .collect(Collectors.toList());
+  }
+
+  private static boolean isIntValue(String rawValue) {
+    try {
+      Integer.parseInt(rawValue);
+    } catch (NullPointerException | NumberFormatException e) {
+      return false;
+    }
+    return true;
   }
 
   private Optional<BigDecimal> getBigDecimal(Object value) {
@@ -113,7 +126,20 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
     }
   }
 
-  private BigDecimal calc(Collection<BigDecimal> numbers, BinaryOperator<BigDecimal> operation) {
-    return numbers.stream().reduce(operation).orElse(BigDecimal.ZERO);
+  private Optional<BigDecimal> calc(Collection<BigDecimal> numbers,
+                                    BinaryOperator<BigDecimal> operation) {
+    BigDecimal result = null;
+    for (BigDecimal number : numbers) {
+      if (result == null) {
+        result = number;
+      } else {
+        try {
+          result = operation.apply(result, number);
+        } catch (ArithmeticException e) {
+          return Optional.empty();
+        }
+      }
+    }
+    return Optional.ofNullable(result);
   }
 }
