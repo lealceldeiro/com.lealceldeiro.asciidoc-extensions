@@ -1,4 +1,4 @@
-package com.lealceldeiro.asciidoc.extensions;
+package com.lealceldeiro.asciidoc.extensions.calcdate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -50,7 +50,7 @@ public class CalcDateMacro extends InlineMacroProcessor {
   }
 
   private String calculate(String operation, Map<String, Object> attributes) {
-    logDebug("Operation on optionalDate: " + operation);
+    logDebug("Operator on optionalDate: " + operation);
     logDebug("Attributes: " + attributes);
 
     boolean ignoreInvalid = ignoreInvalid(attributes);

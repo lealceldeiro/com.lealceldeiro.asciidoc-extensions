@@ -1,10 +1,11 @@
-package com.lealceldeiro.asciidoc.extensions;
+package com.lealceldeiro.asciidoc.extensions.calcexpression;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.Format;
 import org.asciidoctor.extension.FormatType;
@@ -28,11 +29,6 @@ import org.mariuszgromada.math.mxparser.License;
 public class CalcExpressionMacro extends InlineMacroProcessor {
   public static final String EXP_KEY = "exp";
 
-  public static final String NOT_AN_EXPRESSION = "NaE";
-  public static final String NOT_AN_AUTHOR = "NaA";
-  public static final String NOT_A_VALID_AUTHOR = "NaVA";
-  public static final String NOT_A_LICENSE = "NaL";
-
   public static final String AUTHOR_KEY = "author";
   public static final String LICENSE_TYPE_KEY = "calc_exp_license_type";
   public static final String LICENSE_TYPE_COMMERCIAL_VALUE = "commercial";
@@ -44,21 +40,21 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
 
     String expression = getExpression(attributes);
     if (expression == null || expression.isBlank()) {
-      return NOT_AN_EXPRESSION;
+      return InvalidValue.NOT_AN_EXPRESSION;
     }
 
     String author = getAttribute(AUTHOR_KEY, parent, attributes);
     if (author == null) {
-      return NOT_AN_AUTHOR;
+      return InvalidValue.NOT_AN_AUTHOR;
     }
     if (author.length() < 5) {
-      return NOT_A_VALID_AUTHOR;
+      return InvalidValue.NOT_A_VALID_AUTHOR;
     }
 
     String licenseType = getAttribute(LICENSE_TYPE_KEY, parent, attributes,
                                       LICENSE_TYPE_COMMERCIAL_VALUE, LICENSE_TYPE_NON_COMMERCIAL_VALUE);
     if (licenseType == null) {
-      return NOT_A_LICENSE;
+      return InvalidValue.NOT_A_LICENSE;
     }
 
     confirmXParserLicence(author, licenseType);
@@ -106,7 +102,7 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
     return evalExpression(expression).map(BigDecimal::new)
                                      .map(value -> value.setScale(2, RoundingMode.CEILING))
                                      .map(BigDecimal::toString)
-                                     .orElse(NOT_AN_EXPRESSION);
+                                     .orElse(InvalidValue.NOT_AN_EXPRESSION);
   }
 
   private String getExpression(Map<String, Object> attrs) {

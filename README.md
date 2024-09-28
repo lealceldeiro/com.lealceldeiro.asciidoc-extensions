@@ -102,6 +102,18 @@ calc:sum[1,"this is a text", mode="ignore_invalid"]
 calc:sum[1,"this is a text"]
 ```
 
+If there's any exception while doing the calculation because of an arithmetic rule,
+then `NaVM` is returned.
+For example:
+
+```asciidoc
+// outputs `NaVM`, as division by zero is not mathematically possible
+calc:divide[4, 0]
+
+// outputs `0`, as dividing zero by another number different from zero is mathematically possible
+calc:divide[0, 4]
+```
+
 ## `calc_date`
 
 Similarly, the `calc_date` performs two simple operations on dates: addition and subtraction.
