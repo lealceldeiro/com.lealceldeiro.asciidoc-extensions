@@ -26,9 +26,10 @@ import org.asciidoctor.extension.PositionalAttributes;
  * </a>
  */
 @Name("calc")
-@PositionalAttributes("mode")
+@PositionalAttributes(Macro.Key.MODE)
 public class CalcMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
+  static final String MODE_ATTRIBUTE_POSITION = "1";
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
@@ -79,18 +80,21 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<String, Stri
   }
 
   private static int positionalAttributesCount(Map<String, Object> attributes) {
-    return attributes.containsKey(Macro.Key.MODE) ? 1 : 0;
+    return (attributes.containsKey(Macro.Key.MODE)
+            || Macro.Value.IGNORE_INVALID.equals(attributes.get(MODE_ATTRIBUTE_POSITION))) ? 1 : 0;
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
-    return attributes.containsKey(Macro.Key.MODE)
-           && Macro.Value.IGNORE_INVALID.equals(String.valueOf(attributes.get(Macro.Key.MODE)));
+    Object mode = attributes.getOrDefault(Macro.Key.MODE, attributes.get(MODE_ATTRIBUTE_POSITION));
+    return mode != null && Macro.Value.IGNORE_INVALID.equals(String.valueOf(mode));
   }
 
   private List<BigDecimal> getNumbers(Map<String, Object> attributes) {
     return attributes.entrySet()
                      .stream()
-                     .filter(entry -> !Macro.Key.MODE.equals(entry.getKey()))
+                     .filter(entry -> !Macro.Key.MODE.equals(entry.getKey())
+                                      && !(MODE_ATTRIBUTE_POSITION.equals(entry.getKey())
+                                           && Macro.Value.IGNORE_INVALID.equals(entry.getValue())))
                      .filter(entry -> isIntValue(entry.getKey()))
                      .sorted((entry1, entry2) -> {
                        int key1 = Integer.parseInt(entry1.getKey());

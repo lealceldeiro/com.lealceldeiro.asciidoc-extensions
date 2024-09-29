@@ -9,9 +9,6 @@
 [//]: # ()
 [//]: # ([![CodeQL]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml/badge.svg&#41;]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml&#41;)
 
-[//]: # ()
-[//]: # ()
-[//]: # ([![Codecov]&#40;https://codecov.io/gh/lealceldeiro/com.lealceldeiro.asciidoc-extensions/branch/main/graph/badge.svg&#41;]&#40;https://codecov.io/gh/lealceldeiro/com.lealceldeiro.asciidoc-extensions&#41;)
 
 This project was born from my need to evaluate some simple mathematical expressions
 within Asciidoc files and
@@ -96,11 +93,15 @@ and the calculation is performed as if it was not provided at all.
 For example:
 
 ```asciidoc
-// outputs 1, as it's equivalent to calc:sum[1]
+// these two options, both, output 1, as it's equivalent to calc:sum[1]
 calc:sum[1,"this is a text", mode="ignore_invalid"]
+calc:sum[ignore_invalid, 1,"this is a text"]
 
 // outputs NaN, as "this is a text" is not a valid number
 calc:sum[1,"this is a text"]
+
+// outputs NaN, as "ignore_invalid" was neither provided as a named argument nor as an unnamed one in the first position 
+calc:sum[1, 2, ignore_invalid]
 ```
 
 If there's any exception while doing the calculation because of an arithmetic rule,
