@@ -9,6 +9,9 @@ public final class Macro {
     }
 
     public static final String MODE = "mode";
+    public static final String DATE = "date";
+    public static final String VALUE = "value";
+    public static final String TARGET_FORMAT = "format";
   }
 
   public static final class Value {

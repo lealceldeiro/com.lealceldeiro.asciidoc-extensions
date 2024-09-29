@@ -1,5 +1,6 @@
 package com.lealceldeiro.asciidoc.extensions.calc;
 
+import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;

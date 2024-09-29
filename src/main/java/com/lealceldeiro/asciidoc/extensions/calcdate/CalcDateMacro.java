@@ -1,5 +1,15 @@
 package com.lealceldeiro.asciidoc.extensions.calcdate;
 
+import com.lealceldeiro.asciidoc.extensions.Calc;
+import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.Macro;
+import com.lealceldeiro.asciidoc.extensions.Operator;
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
+import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.extension.InlineMacroProcessor;
+import org.asciidoctor.extension.Name;
+import org.asciidoctor.extension.PositionalAttributes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -10,13 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import org.asciidoctor.ast.ContentNode;
-import org.asciidoctor.extension.InlineMacroProcessor;
-import org.asciidoctor.extension.Name;
-import org.asciidoctor.extension.PositionalAttributes;
-import org.asciidoctor.log.LogRecord;
-import org.asciidoctor.log.Severity;
-
 /**
  * Docs at
  * <a href="https://docs.asciidoctor.org/asciidoctorj/latest/extensions/extensions-introduction/">
@@ -24,21 +27,17 @@ import org.asciidoctor.log.Severity;
  * </a>
  */
 @Name("calc_date")
-@PositionalAttributes({"date", "value", "format", "mode"})
-public class CalcDateMacro extends InlineMacroProcessor {
-  public static final String NOT_A_NUMBER = "NaN";
-  public static final String NOT_A_DATE = "NaD";
-  public static final String NOT_AN_OPERATION = "NaO";
-  public static final String NOT_A_FORMAT = "NaF";
-  public static final String SUM = "sum";
-  public static final String SUB = "sub";
+@PositionalAttributes({Macro.Key.DATE, Macro.Key.VALUE, Macro.Key.TARGET_FORMAT, Macro.Key.MODE})
+public class CalcDateMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
+  private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
 
-  public static final String MODE = "mode";
-  public static final String IGNORE_INVALID = "ignore_invalid";
-
-  public static final String DATE_KEY = "date";
-  public static final String VALUE_KEY = "value";
-  public static final String FORMAT_KEY = "format";
+  static final String DAY = "d";
+  static final String MONTH = "m";
+  static final String YEAR = "y";
+  static final String DATE_ATTRIBUTE_POSITION = "1";
+  static final String AMOUNT_ATTRIBUTE_POSITION = "2";
+  static final String TARGET_FORMAT_ATTRIBUTE_POSITION = "3";
+  static final String MODE_ATTRIBUTE_POSITION = "4";
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
@@ -49,65 +48,59 @@ public class CalcDateMacro extends InlineMacroProcessor {
     return createPhraseNode(parent, "quoted", calcResult, Collections.emptyMap());
   }
 
-  private String calculate(String operation, Map<String, Object> attributes) {
-    logDebug("Operator on optionalDate: " + operation);
-    logDebug("Attributes: " + attributes);
+  @Override
+  public String calculate(String operation, Map<String, Object> attributes) {
+    logger.log(this, "Operator on optionalDate: " + operation);
+    logger.log(this, "Attributes: " + attributes);
 
     boolean ignoreInvalid = ignoreInvalid(attributes);
     if (ignoreInvalid) {
-      logDebug("Ignoring invalid attributes");
+      logger.log(this, "Ignoring invalid attributes");
     }
 
     Optional<LocalDate> optionalDate = getDate(attributes, ignoreInvalid);
     if (optionalDate.isEmpty()) {
-      return NOT_A_DATE;
+      return InvalidValue.NOT_A_DATE;
     }
 
     Optional<Long> optionalAmount = getAmount(attributes, ignoreInvalid);
     if (optionalAmount.isEmpty()) {
-      return NOT_A_NUMBER;
+      return InvalidValue.NOT_A_NUMBER;
     }
 
     String rawTargetFormat = getRawTargetFormat(attributes);
     Optional<DateTimeFormatter> optionalTargetFormat = getTargetFormat(rawTargetFormat, ignoreInvalid);
     if (!ignoreInvalid && optionalTargetFormat.isEmpty() && rawTargetFormat != null) {
-      return NOT_A_FORMAT;
+      return InvalidValue.NOT_A_FORMAT;
     }
 
-    DateTimeFormatter formatter
-        = optionalTargetFormat.orElse(DateTimeFormatter.ISO_LOCAL_DATE);
+    DateTimeFormatter formatter = optionalTargetFormat.orElse(DateTimeFormatter.ISO_LOCAL_DATE);
     TemporalUnit unit = getTemporalUnit(attributes);
 
     LocalDate date = optionalDate.get();
     long amount = optionalAmount.get();
-    logDebug("Performing " + operation
-             + " on date: " + date
-             + " with amount: " + amount
-             + " and formatter: " + formatter);
+    logger.log(this, "Performing " + operation
+                     + " on date: " + date
+                     + " with amount: " + amount
+                     + " and formatter: " + formatter);
 
-    switch (operation) {
-      case SUM:
-        return formatter.format(date.plus(amount, unit));
-      case SUB:
-        return formatter.format(date.minus(amount, unit));
+    if (operation.equals(Operator.SUM)) {
+      return formatter.format(date.plus(amount, unit));
     }
-
-    return NOT_AN_OPERATION;
-  }
-
-  private void logDebug(String message) {
-    log(new LogRecord(Severity.DEBUG, message));
+    if (operation.equals(Operator.SUB)) {
+      return formatter.format(date.minus(amount, unit));
+    }
+    return InvalidValue.NOT_AN_OPERATION;
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
-    return attributes.containsKey(MODE)
-           && IGNORE_INVALID.equals(String.valueOf(attributes.get(MODE)));
+    return attributes.containsKey(Macro.Key.MODE)
+           && Macro.Value.IGNORE_INVALID.equals(String.valueOf(attributes.get(Macro.Key.MODE)));
   }
 
   private Optional<LocalDate> getDate(Map<String, Object> attributes, boolean ignoreInvalid) {
-    Object dateValue = attributes.containsKey(DATE_KEY)
-                       ? attributes.get(DATE_KEY)
-                       : attributes.get("1");
+    Object dateValue = attributes.getOrDefault(Macro.Key.DATE,
+                                               attributes.get(DATE_ATTRIBUTE_POSITION));
     LocalDate date = null;
     try {
       date = LocalDate.parse(dateValue.toString());
@@ -120,9 +113,9 @@ public class CalcDateMacro extends InlineMacroProcessor {
   }
 
   private Optional<Long> getAmount(Map<String, Object> attr, boolean ignoreInvalid) {
-    Object value = attr.containsKey(VALUE_KEY) ? attr.get(VALUE_KEY) : attr.get("2");
+    Object value = attr.getOrDefault(Macro.Key.VALUE, attr.get(AMOUNT_ATTRIBUTE_POSITION));
     String valueString = String.valueOf(value);
-    if (valueString.endsWith("d") || valueString.endsWith("m") || valueString.endsWith("y")) {
+    if (valueString.endsWith(DAY) || valueString.endsWith(MONTH) || valueString.endsWith(YEAR)) {
       String rawValue = valueString.substring(0, valueString.length() - 1);
 
       return getLong(rawValue, ignoreInvalid);
@@ -131,11 +124,10 @@ public class CalcDateMacro extends InlineMacroProcessor {
   }
 
   private String getRawTargetFormat(Map<String, Object> attr) {
-    String value = String.valueOf(attr.containsKey(FORMAT_KEY)
-                                  ? attr.get(FORMAT_KEY)
-                                  : attr.get("3"));
-    logDebug("Raw format: " + value);
-    return value;
+    Object value = attr.getOrDefault(Macro.Key.TARGET_FORMAT,
+                                     attr.get(TARGET_FORMAT_ATTRIBUTE_POSITION));
+    logger.log(this, "Raw format: " + value);
+    return value != null ? value.toString() : null;
   }
 
   private Optional<DateTimeFormatter> getTargetFormat(String rawFormat, boolean ignoreInvalid) {
@@ -163,20 +155,19 @@ public class CalcDateMacro extends InlineMacroProcessor {
   }
 
   private TemporalUnit getTemporalUnit(Map<String, Object> attributes) {
-    Object value = attributes.containsKey(VALUE_KEY)
-                   ? attributes.get(VALUE_KEY)
-                   : attributes.get("2");
+    Object value = attributes.getOrDefault(Macro.Key.VALUE,
+                                           attributes.get(AMOUNT_ATTRIBUTE_POSITION));
     String valueString = String.valueOf(value);
-    String rawValue = "d";
-    if (valueString.endsWith("d") || valueString.endsWith("m") || valueString.endsWith("y")) {
+    String rawValue = DAY;
+    if (valueString.endsWith(DAY) || valueString.endsWith(MONTH) || valueString.endsWith(YEAR)) {
       rawValue = valueString.substring(valueString.length() - 1);
     }
     switch (rawValue) {
-      case "y":
+      case YEAR:
         return ChronoUnit.YEARS;
-      case "m":
+      case MONTH:
         return ChronoUnit.MONTHS;
-      case "d":
+      case DAY:
       default:
         return ChronoUnit.DAYS;
     }

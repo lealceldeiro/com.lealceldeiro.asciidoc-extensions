@@ -2,6 +2,7 @@ package com.lealceldeiro.asciidoc.extensions.calc;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
