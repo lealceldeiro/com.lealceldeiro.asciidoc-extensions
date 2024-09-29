@@ -4,6 +4,7 @@
 [![maven-central](https://img.shields.io/maven-central/v/com.lealceldeiro/asciidoc-extensions?style=flat)](https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions)
 [![Maven Build](https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/maven-publish.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions&metric=coverage)](https://sonarcloud.io/summary/new_code?id=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions)
 
 [//]: # ()
 [//]: # ([![CodeQL]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml/badge.svg&#41;]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml&#41;)
