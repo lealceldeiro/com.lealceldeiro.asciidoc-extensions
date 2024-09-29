@@ -94,8 +94,8 @@ public class CalcDateMacro extends InlineMacroProcessor implements Calc<String, 
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
-    return attributes.containsKey(Macro.Key.MODE)
-           && Macro.Value.IGNORE_INVALID.equals(String.valueOf(attributes.get(Macro.Key.MODE)));
+    Object mode = attributes.getOrDefault(Macro.Key.MODE, attributes.get(MODE_ATTRIBUTE_POSITION));
+    return mode != null && Macro.Value.IGNORE_INVALID.equals(String.valueOf(mode));
   }
 
   private Optional<LocalDate> getDate(Map<String, Object> attributes, boolean ignoreInvalid) {

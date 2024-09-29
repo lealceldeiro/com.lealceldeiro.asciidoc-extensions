@@ -4,9 +4,12 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -76,7 +79,33 @@ class CalcDateMacroTest {
                   InvalidValue.NOT_A_NUMBER),
         arguments(Operator.SUM,
                   Map.of("1", "2024-01-01", "2", "1w"),
-                  InvalidValue.NOT_A_NUMBER)
+                  InvalidValue.NOT_A_NUMBER),
+
+        arguments(Operator.SUM,
+                  Map.of(Macro.Key.MODE, Macro.Value.IGNORE_INVALID, "1", "2024-01-01", "2", "x"),
+                  "2024-01-01"),
+        arguments(Operator.SUM,
+                  Map.of(CalcDateMacro.MODE_ATTRIBUTE_POSITION, Macro.Value.IGNORE_INVALID,
+                         "1", "not a date", "2", "1d"),
+                  LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE)),
+        arguments(Operator.SUM,
+                  Map.of(Macro.Key.MODE, Macro.Value.IGNORE_INVALID,
+                         "1", "2024-01-01", "2", "1d",
+                         Macro.Key.TARGET_FORMAT, "not a valid format"),
+                  "2024-01-02"),
+
+        arguments(Operator.SUB,
+                  Map.of("1", "2024-01-01", "2", "2d"),
+                  "2023-12-30"),
+        arguments(Operator.SUB,
+                  Map.of("1", "2024-01-01", "2", "5"),
+                  "2023-12-27"),
+        arguments(Operator.SUB,
+                  Map.of("1", "2024-01-01", "2", "1m"),
+                  "2023-12-01"),
+        arguments(Operator.SUB,
+                  Map.of("1", "2024-01-01", "2", "1y"),
+                  "2023-01-01")
                     );
   }
 
