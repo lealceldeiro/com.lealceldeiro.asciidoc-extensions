@@ -185,6 +185,24 @@ When it's used, any invalid value will be replaced as follows:
 - `amount` is replaced by `0`
 - `format` is replaced by `DateTimeFormatter.ISO_DATE`
 
+For example:
+
+```asciidoc
+// supposing LocalDate#now() returns 2025-01-01, then this returns 2025-01-02 as it replaces the invalid date
+calc_date:sum["1st of Jan 2024", 1, mode=ignore_invalid]
+```
+
+```asciidoc
+// this returns 2024-01-01 as `0` replaces the invalid value to add to the date
+calc_date:sum[2024-01-01, xyz, mode=ignore_invalid]
+```
+
+```asciidoc
+// these two options return 2024-01-03 as the default format replaces the invalid one
+calc_date:sum[2024-01-01, 2, format="j0", mode=ignore_invalid]
+calc_date:sum[2024-01-01, 2, format="j0", ignore_invalid]
+```
+
 ## `calc_exp`
 
 ### Important License Notice
