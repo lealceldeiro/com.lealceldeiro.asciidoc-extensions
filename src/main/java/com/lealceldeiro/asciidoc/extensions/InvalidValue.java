@@ -8,6 +8,8 @@ public final class InvalidValue {
   public static final String NOT_AN_AUTHOR = "NaA";
   public static final String NOT_A_VALID_AUTHOR = "NaVA";
   public static final String NOT_A_LICENSE = "NaL";
+  public static final String NOT_A_DATE = "NaD";
+  public static final String NOT_A_FORMAT = "NaF";
 
   private InvalidValue() {
   }

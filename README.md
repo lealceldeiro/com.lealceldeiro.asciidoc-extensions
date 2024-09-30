@@ -4,13 +4,11 @@
 [![maven-central](https://img.shields.io/maven-central/v/com.lealceldeiro/asciidoc-extensions?style=flat)](https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions)
 [![Maven Build](https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/maven-publish.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions&metric=coverage)](https://sonarcloud.io/summary/new_code?id=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions)
 
 [//]: # ()
 [//]: # ([![CodeQL]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml/badge.svg&#41;]&#40;https://github.com/lealceldeiro/com.lealceldeiro.asciidoc-extensions/actions/workflows/codeql-analysis.yml&#41;)
 
-[//]: # ()
-[//]: # ()
-[//]: # ([![Codecov]&#40;https://codecov.io/gh/lealceldeiro/com.lealceldeiro.asciidoc-extensions/branch/main/graph/badge.svg&#41;]&#40;https://codecov.io/gh/lealceldeiro/com.lealceldeiro.asciidoc-extensions&#41;)
 
 This project was born from my need to evaluate some simple mathematical expressions
 within Asciidoc files and
@@ -95,11 +93,15 @@ and the calculation is performed as if it was not provided at all.
 For example:
 
 ```asciidoc
-// outputs 1, as it's equivalent to calc:sum[1]
+// these two options, both, output 1, as it's equivalent to calc:sum[1]
 calc:sum[1,"this is a text", mode="ignore_invalid"]
+calc:sum[ignore_invalid, 1,"this is a text"]
 
 // outputs NaN, as "this is a text" is not a valid number
 calc:sum[1,"this is a text"]
+
+// outputs NaN, as "ignore_invalid" was neither provided as a named argument nor as an unnamed one in the first position 
+calc:sum[1, 2, ignore_invalid]
 ```
 
 If there's any exception while doing the calculation because of an arithmetic rule,
@@ -182,6 +184,24 @@ When it's used, any invalid value will be replaced as follows:
 - `date` is replaced by `LocalDate#now()`
 - `amount` is replaced by `0`
 - `format` is replaced by `DateTimeFormatter.ISO_DATE`
+
+For example:
+
+```asciidoc
+// supposing LocalDate#now() returns 2025-01-01, then this returns 2025-01-02 as it replaces the invalid date
+calc_date:sum["1st of Jan 2024", 1, mode=ignore_invalid]
+```
+
+```asciidoc
+// this returns 2024-01-01 as `0` replaces the invalid value to add to the date
+calc_date:sum[2024-01-01, xyz, mode=ignore_invalid]
+```
+
+```asciidoc
+// these two options return 2024-01-03 as the default format replaces the invalid one
+calc_date:sum[2024-01-01, 2, format="j0", mode=ignore_invalid]
+calc_date:sum[2024-01-01, 2, format="j0", ignore_invalid]
+```
 
 ## `calc_exp`
 

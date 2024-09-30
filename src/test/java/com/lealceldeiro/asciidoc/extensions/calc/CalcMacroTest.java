@@ -2,6 +2,7 @@ package com.lealceldeiro.asciidoc.extensions.calc;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
@@ -31,6 +32,15 @@ class CalcMacroTest {
         arguments(Operator.SUM,
                   Map.of(Macro.Key.MODE, Macro.Value.IGNORE_INVALID, "0", "not a number", "1", "2"),
                   "2.00"),
+        arguments(Operator.SUM,
+                  Map.of("1", Macro.Value.IGNORE_INVALID, "2", "not a number", "3", "2"),
+                  "2.00"),
+        arguments(Operator.SUM,
+                  Map.of("1", Macro.Value.IGNORE_INVALID, "2", "2", "3", "not a number"),
+                  "2.00"),
+        arguments(Operator.SUM,
+                  Map.of("1", "2", "2", "2", "3", Macro.Value.IGNORE_INVALID),
+                  InvalidValue.NOT_A_NUMBER),
         arguments(Operator.SUM,
                   Map.of("0", "-4", "1", "5"),
                   "1.00"),

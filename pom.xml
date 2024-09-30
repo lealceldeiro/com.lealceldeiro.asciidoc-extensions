@@ -5,7 +5,7 @@
 
   <groupId>com.lealceldeiro</groupId>
   <artifactId>asciidoc-extensions</artifactId>
-  <version>0.4.10</version>
+  <version>0.4.11</version>
   <packaging>jar</packaging>
 
   <name>asciidoc-extensions</name>
@@ -32,6 +32,7 @@
     <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     <MathParser.org-mXparser.version>6.0.0</MathParser.org-mXparser.version>
     <mockito.version>5.13.0</mockito.version>
+    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
   </properties>
 
   <organization>
@@ -98,6 +99,11 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>${jacoco-maven-plugin.version}</version>
     </dependency>
   </dependencies>
 
@@ -181,6 +187,32 @@
           <autoPublish>true</autoPublish>
           <waitUntil>published</waitUntil>
         </configuration>
+      </plugin>
+
+      <!-- https://docs.sonarsource.com/sonarcloud/enriching/test-coverage/java-test-coverage/ -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>XML</format>
+              </formats>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
