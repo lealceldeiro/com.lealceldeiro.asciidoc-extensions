@@ -148,7 +148,7 @@ class CalcMacroTest {
       ExtensionLogger loggerMock = Mockito.mock(ExtensionLogger.class);
       elf.when(ExtensionLoggerFactory::getInstance).thenReturn(loggerMock);
 
-      Calc<String, String, Map<String, Object>> calcMacro = new CalcMacro();
+      Calc<Map<String, Object>> calcMacro = new CalcMacro();
       String result = calcMacro.calculate(operation, attributes);
 
       Assertions.assertEquals(expected, result);
