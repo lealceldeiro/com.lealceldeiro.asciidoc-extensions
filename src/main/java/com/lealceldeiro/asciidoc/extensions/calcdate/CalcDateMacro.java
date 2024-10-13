@@ -28,7 +28,7 @@ import java.util.Optional;
  */
 @Name("calc_date")
 @PositionalAttributes({Macro.Key.DATE, Macro.Key.VALUE, Macro.Key.TARGET_FORMAT, Macro.Key.MODE})
-public class CalcDateMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
+public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
 
   static final String DAY = "d";

@@ -1,19 +1,24 @@
 package com.lealceldeiro.asciidoc.extensions.calcexpression;
 
+import static com.lealceldeiro.asciidoc.extensions.Macro.Key.AUTHOR;
+import static com.lealceldeiro.asciidoc.extensions.Macro.Key.EXP;
+import static com.lealceldeiro.asciidoc.extensions.Macro.Key.LICENSE_TYPE;
+
+import com.lealceldeiro.asciidoc.extensions.Calc;
+import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
+import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.extension.Format;
 import org.asciidoctor.extension.FormatType;
 import org.asciidoctor.extension.InlineMacroProcessor;
 import org.asciidoctor.extension.Name;
 import org.asciidoctor.extension.PositionalAttributes;
-import org.asciidoctor.log.LogRecord;
-import org.asciidoctor.log.Severity;
 import org.mariuszgromada.math.mxparser.Expression;
 import org.mariuszgromada.math.mxparser.License;
 
@@ -25,25 +30,64 @@ import org.mariuszgromada.math.mxparser.License;
  */
 @Name("calc_exp")
 @Format(FormatType.SHORT)
-@PositionalAttributes({"exp", "author", "calc_exp_license_type"})
-public class CalcExpressionMacro extends InlineMacroProcessor {
-  public static final String EXP_KEY = "exp";
+@PositionalAttributes({EXP, AUTHOR, LICENSE_TYPE})
+public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<CalcExpressionMacro.Attributes> {
+  public static final class Attributes {
+    private final Map<String, Object> attributesAtParent;
+    private final Map<String, Object> attributesAtMacro;
 
-  public static final String AUTHOR_KEY = "author";
-  public static final String LICENSE_TYPE_KEY = "calc_exp_license_type";
+    public Attributes(Map<String, Object> attributesAtParent,
+                      Map<String, Object> attributesAtMacro) {
+      this.attributesAtParent = attributesAtParent;
+      this.attributesAtMacro = attributesAtMacro;
+    }
+
+    Object getAttribute(String key) {
+      return attributesAtParent.getOrDefault(key, attributesAtMacro.get(key));
+    }
+
+    @Override
+    public String toString() {
+      return "Attributes{" +
+             "attributesAtParent=" + attributesAtParent +
+             ", attributesAtMacro=" + attributesAtMacro +
+             '}';
+    }
+  }
+
+  private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
+  static final String EXP_POSITION = "1";
+
   public static final String LICENSE_TYPE_COMMERCIAL_VALUE = "commercial";
   public static final String LICENSE_TYPE_NON_COMMERCIAL_VALUE = "non_commercial";
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
-    logDebug("Attributes: " + attributes);
+    Attributes attrs = getCalculationAttributes(parent, attributes);
+    String result = calculate(target, attrs);
+
+    // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
+    // https://www.rubydoc.info/gems/asciidoctor-pdf/Asciidoctor/PDF/Converter#convert_inline_quoted-instance_method
+    return createPhraseNode(parent, "quoted", result, Collections.emptyMap());
+  }
+
+  private static Attributes getCalculationAttributes(ContentNode parent,
+                                                     Map<String, Object> macroAttributes) {
+    return new Attributes(Map.of(AUTHOR, parent.getAttribute(AUTHOR),
+                                 LICENSE_TYPE, parent.getAttribute(LICENSE_TYPE)),
+                          macroAttributes);
+  }
+
+  @Override
+  public String calculate(String ignored, Attributes attributes) {
+    logger.log(this, "Attributes: " + attributes);
 
     String expression = getExpression(attributes);
     if (expression == null || expression.isBlank()) {
       return InvalidValue.NOT_AN_EXPRESSION;
     }
 
-    String author = getAttribute(AUTHOR_KEY, parent, attributes);
+    String author = getAttribute(AUTHOR, attributes);
     if (author == null) {
       return InvalidValue.NOT_AN_AUTHOR;
     }
@@ -51,39 +95,38 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
       return InvalidValue.NOT_A_VALID_AUTHOR;
     }
 
-    String licenseType = getAttribute(LICENSE_TYPE_KEY, parent, attributes,
-                                      LICENSE_TYPE_COMMERCIAL_VALUE, LICENSE_TYPE_NON_COMMERCIAL_VALUE);
+    String licenseType = getAttribute(LICENSE_TYPE, attributes,
+                                      LICENSE_TYPE_COMMERCIAL_VALUE,
+                                      LICENSE_TYPE_NON_COMMERCIAL_VALUE);
     if (licenseType == null) {
       return InvalidValue.NOT_A_LICENSE;
     }
 
     confirmXParserLicence(author, licenseType);
-    String calcResult = evaluate(expression);
-
-    // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
-    // https://www.rubydoc.info/gems/asciidoctor-pdf/Asciidoctor/PDF/Converter#convert_inline_quoted-instance_method
-    return createPhraseNode(parent, "quoted", calcResult, Collections.emptyMap());
+    return evaluate(expression);
   }
 
-  private static String getAttribute(String attrName, ContentNode parent, Map<String, Object> attrs,
+  private static String getAttribute(String attrName, Attributes attributes,
                                      String... validValues) {
-    Object rawAttr = attrs.containsKey(attrName)
-                     ? attrs.get(attrName)
-                     : parent.getDocument().getAttribute(attrName);
+    Object rawAttr
+        = attributes.attributesAtMacro.getOrDefault(attrName,
+                                                    attributes.attributesAtParent.get(attrName));
+    if (rawAttr == null) {
+      return null;
+    }
     String attr = String.valueOf(rawAttr);
-
-    if (attr == null || attr.isBlank()) {
+    if (attr.isBlank()) {
       return null;
     }
 
-    boolean valid = validValues.length == 0;
+    boolean skipValidValuesEvaluation = validValues.length == 0;
     for (String validValue : validValues) {
       if (attr.equals(validValue)) {
         return attr;
       }
     }
 
-    return valid ? attr : null;
+    return skipValidValuesEvaluation ? attr : null;
   }
 
   private void confirmXParserLicence(String author, String licenseType) {
@@ -92,12 +135,12 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
     } else if (LICENSE_TYPE_COMMERCIAL_VALUE.equals(licenseType)) {
       License.iConfirmCommercialUse(author);
     } else {
-      logDebug("Unknown license type: " + licenseType);
+      logger.log(this, "Unknown license type: " + licenseType);
     }
   }
 
   private String evaluate(String expression) {
-    logDebug("Expression: " + expression);
+    logger.log(this, "Expression: " + expression);
 
     return evalExpression(expression).map(BigDecimal::new)
                                      .map(value -> value.setScale(2, RoundingMode.CEILING))
@@ -105,13 +148,10 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
                                      .orElse(InvalidValue.NOT_AN_EXPRESSION);
   }
 
-  private String getExpression(Map<String, Object> attrs) {
-    Object val = attrs.getOrDefault(EXP_KEY, attrs.get("1"));
+  private String getExpression(Attributes attributes) {
+    Map<String, Object> attrs = attributes.attributesAtMacro;
+    Object val = attrs.getOrDefault(EXP, attrs.get(EXP_POSITION));
     return val != null ? String.valueOf(val) : null;
-  }
-
-  private void logDebug(String message) {
-    log(new LogRecord(Severity.DEBUG, message));
   }
 
   /**
@@ -127,8 +167,8 @@ public class CalcExpressionMacro extends InlineMacroProcessor {
     Expression exp = new Expression(expression);
     double expResult = exp.calculate();
     if (Double.isNaN(expResult)) {
-      logDebug(expResult + " returned from math lib for expression: " + expression
-               + ", evaluated: " + exp);
+      logger.log(this, expResult + " returned from math lib for expression: " + expression
+                       + ", evaluated: " + exp);
       return Optional.empty();
     }
     return Optional.of(expResult);

@@ -28,7 +28,7 @@ import org.asciidoctor.extension.PositionalAttributes;
  */
 @Name("calc")
 @PositionalAttributes(Macro.Key.MODE)
-public class CalcMacro extends InlineMacroProcessor implements Calc<String, String, Map<String, Object>> {
+public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
   static final String MODE_ATTRIBUTE_POSITION = "1";
 
