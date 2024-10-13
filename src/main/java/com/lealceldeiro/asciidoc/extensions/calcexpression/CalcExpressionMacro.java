@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.Format;
 import org.asciidoctor.extension.FormatType;
 import org.asciidoctor.extension.InlineMacroProcessor;
@@ -34,28 +35,28 @@ import org.mariuszgromada.math.mxparser.License;
 @PositionalAttributes({EXP, AUTHOR, LICENSE_TYPE})
 public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<CalcExpressionMacro.Attributes> {
   public static final class Attributes {
-    private final Map<String, Object> attributesAtParent;
-    private final Map<String, Object> attributesAtMacro;
+    private final Map<String, Object> documentAttributes;
+    private final Map<String, Object> macroAttributes;
 
-    public Attributes(Map<String, Object> attributesAtParent,
-                      Map<String, Object> attributesAtMacro) {
-      this.attributesAtParent = Optional.ofNullable(attributesAtParent)
+    public Attributes(Map<String, Object> documentAttributes,
+                      Map<String, Object> macroAttributes) {
+      this.documentAttributes = Optional.ofNullable(documentAttributes)
                                         .map(HashMap::new)
                                         .orElseGet(HashMap::new);
-      this.attributesAtMacro = Optional.ofNullable(attributesAtMacro)
-                                       .map(HashMap::new)
-                                       .orElseGet(HashMap::new);
+      this.macroAttributes = Optional.ofNullable(macroAttributes)
+                                     .map(HashMap::new)
+                                     .orElseGet(HashMap::new);
     }
 
     Object getAttribute(String key) {
-      return attributesAtParent.getOrDefault(key, attributesAtMacro.get(key));
+      return macroAttributes.getOrDefault(key, documentAttributes.get(key));
     }
 
     @Override
     public String toString() {
       return "Attributes{" +
-             "attributesAtParent=" + attributesAtParent +
-             ", attributesAtMacro=" + attributesAtMacro +
+             "documentAttributes=" + documentAttributes +
+             ", macroAttributes=" + macroAttributes +
              '}';
     }
   }
@@ -68,7 +69,7 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
 
   @Override
   public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
-    Attributes attrs = getCalculationAttributes(parent, attributes);
+    Attributes attrs = getCalculationAttributes(parent.getDocument(), attributes);
     String result = calculate(target, attrs);
 
     // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
@@ -76,18 +77,18 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
     return createPhraseNode(parent, "quoted", result, Collections.emptyMap());
   }
 
-  static Attributes getCalculationAttributes(ContentNode parent,
+  static Attributes getCalculationAttributes(Document parentDocument,
                                              Map<String, Object> macroAttributes) {
-    Map<String, Object> parentAttributes = new HashMap<>();
+    Map<String, Object> documentAttributes = new HashMap<>();
 
-    Optional.ofNullable(parent)
-            .map(oParentAttributes -> oParentAttributes.getAttribute(AUTHOR))
-            .ifPresent(pAuthor -> parentAttributes.put(AUTHOR, pAuthor));
-    Optional.ofNullable(parent)
-            .map(oParentAttributes -> oParentAttributes.getAttribute(LICENSE_TYPE))
-            .ifPresent(pLicense -> parentAttributes.put(LICENSE_TYPE, pLicense));
+    Optional.ofNullable(parentDocument)
+            .map(document -> document.getAttribute(AUTHOR))
+            .ifPresent(pAuthor -> documentAttributes.put(AUTHOR, pAuthor));
+    Optional.ofNullable(parentDocument)
+            .map(document -> document.getAttribute(LICENSE_TYPE))
+            .ifPresent(pLicense -> documentAttributes.put(LICENSE_TYPE, pLicense));
 
-    return new Attributes(parentAttributes, macroAttributes);
+    return new Attributes(documentAttributes, macroAttributes);
   }
 
   @Override
@@ -121,8 +122,8 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
   private static String getAttribute(String attrName, Attributes attributes,
                                      String... validValues) {
     Object rawAttr
-        = attributes.attributesAtMacro.getOrDefault(attrName,
-                                                    attributes.attributesAtParent.get(attrName));
+        = attributes.macroAttributes.getOrDefault(attrName,
+                                                  attributes.documentAttributes.get(attrName));
     if (rawAttr == null) {
       return null;
     }
@@ -161,7 +162,7 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
   }
 
   private String getExpression(Attributes attributes) {
-    Map<String, Object> attrs = attributes.attributesAtMacro;
+    Map<String, Object> attrs = attributes.macroAttributes;
     Object val = attrs.getOrDefault(EXP, attrs.get(EXP_POSITION));
     return val != null ? String.valueOf(val) : null;
   }
