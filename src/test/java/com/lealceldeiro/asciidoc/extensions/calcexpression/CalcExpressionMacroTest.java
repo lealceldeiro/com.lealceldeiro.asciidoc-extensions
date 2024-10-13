@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.Document;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -108,10 +108,10 @@ class CalcExpressionMacroTest {
   @ParameterizedTest
   @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
   void getCalculationAttributesReturnsNullIfAttributeNotProvided(String attribute) {
-    ContentNode parent = Mockito.mock(ContentNode.class);
-    Mockito.when(parent.getAttribute(attribute)).thenReturn(null);
+    Document document = Mockito.mock(Document.class);
+    Mockito.when(document.getAttribute(attribute)).thenReturn(null);
     CalcExpressionMacro.Attributes calculationAttributes
-        = CalcExpressionMacro.getCalculationAttributes(parent, null);
+        = CalcExpressionMacro.getCalculationAttributes(document, null);
 
     Assertions.assertNull(calculationAttributes.getAttribute(attribute));
   }
@@ -119,23 +119,23 @@ class CalcExpressionMacroTest {
   @ParameterizedTest
   @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
   void getCalculationAttributesReturnsNullIfAttributesNotFound(String attribute) {
-    ContentNode parent = Mockito.mock(ContentNode.class);
-    Mockito.when(parent.getAttribute(attribute)).thenReturn(null);
+    Document document = Mockito.mock(Document.class);
+    Mockito.when(document.getAttribute(attribute)).thenReturn(null);
     CalcExpressionMacro.Attributes calculationAttributes
-        = CalcExpressionMacro.getCalculationAttributes(parent, Collections.emptyMap());
+        = CalcExpressionMacro.getCalculationAttributes(document, Collections.emptyMap());
 
     Assertions.assertNull(calculationAttributes.getAttribute(attribute));
   }
 
   @ParameterizedTest
   @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
-  void getCalculationAttributesReturnsValueIfAttributesProvidedAtParent(String attribute) {
+  void getCalculationAttributesReturnsValueIfAttributesProvidedAtParentDocument(String attribute) {
     String value = UUID.randomUUID().toString();
 
-    ContentNode parent = Mockito.mock(ContentNode.class);
-    Mockito.when(parent.getAttribute(attribute)).thenReturn(value);
+    Document document = Mockito.mock(Document.class);
+    Mockito.when(document.getAttribute(attribute)).thenReturn(value);
     CalcExpressionMacro.Attributes calculationAttributes
-        = CalcExpressionMacro.getCalculationAttributes(parent, Collections.emptyMap());
+        = CalcExpressionMacro.getCalculationAttributes(document, Collections.emptyMap());
 
     Assertions.assertEquals(value, calculationAttributes.getAttribute(attribute));
   }
@@ -145,10 +145,24 @@ class CalcExpressionMacroTest {
   void getCalculationAttributesReturnsValueIfAttributesProvidedAtMacro(String attribute) {
     String value = UUID.randomUUID().toString();
 
-    ContentNode parent = Mockito.mock(ContentNode.class);
+    Document document = Mockito.mock(Document.class);
     CalcExpressionMacro.Attributes calculationAttributes
-        = CalcExpressionMacro.getCalculationAttributes(parent, Map.of(attribute, value));
+        = CalcExpressionMacro.getCalculationAttributes(document, Map.of(attribute, value));
 
     Assertions.assertEquals(value, calculationAttributes.getAttribute(attribute));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
+  void getCalculationAttributesReturnsValueWithPriorityForMacroAttribute(String attribute) {
+    String documentValue = UUID.randomUUID().toString();
+    String macroValue = UUID.randomUUID().toString();
+
+    Document document = Mockito.mock(Document.class);
+    Mockito.when(document.getAttribute(attribute)).thenReturn(documentValue);
+    CalcExpressionMacro.Attributes calculationAttributes
+        = CalcExpressionMacro.getCalculationAttributes(document, Map.of(attribute, macroValue));
+
+    Assertions.assertEquals(macroValue, calculationAttributes.getAttribute(attribute));
   }
 }
