@@ -11,6 +11,7 @@ import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.asciidoctor.ast.ContentNode;
@@ -38,8 +39,12 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
 
     public Attributes(Map<String, Object> attributesAtParent,
                       Map<String, Object> attributesAtMacro) {
-      this.attributesAtParent = attributesAtParent;
-      this.attributesAtMacro = attributesAtMacro;
+      this.attributesAtParent = Optional.ofNullable(attributesAtParent)
+                                        .map(HashMap::new)
+                                        .orElseGet(HashMap::new);
+      this.attributesAtMacro = Optional.ofNullable(attributesAtMacro)
+                                       .map(HashMap::new)
+                                       .orElseGet(HashMap::new);
     }
 
     Object getAttribute(String key) {
@@ -71,11 +76,18 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
     return createPhraseNode(parent, "quoted", result, Collections.emptyMap());
   }
 
-  private static Attributes getCalculationAttributes(ContentNode parent,
-                                                     Map<String, Object> macroAttributes) {
-    return new Attributes(Map.of(AUTHOR, parent.getAttribute(AUTHOR),
-                                 LICENSE_TYPE, parent.getAttribute(LICENSE_TYPE)),
-                          macroAttributes);
+  static Attributes getCalculationAttributes(ContentNode parent,
+                                             Map<String, Object> macroAttributes) {
+    Map<String, Object> parentAttributes = new HashMap<>();
+
+    Optional.ofNullable(parent)
+            .map(oParentAttributes -> oParentAttributes.getAttribute(AUTHOR))
+            .ifPresent(pAuthor -> parentAttributes.put(AUTHOR, pAuthor));
+    Optional.ofNullable(parent)
+            .map(oParentAttributes -> oParentAttributes.getAttribute(LICENSE_TYPE))
+            .ifPresent(pLicense -> parentAttributes.put(LICENSE_TYPE, pLicense));
+
+    return new Attributes(parentAttributes, macroAttributes);
   }
 
   @Override

@@ -8,11 +8,14 @@ import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
+import org.asciidoctor.ast.ContentNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mariuszgromada.math.mxparser.License;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -100,5 +103,52 @@ class CalcExpressionMacroTest {
         }
       }
     }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
+  void getCalculationAttributesReturnsNullIfAttributeNotProvided(String attribute) {
+    ContentNode parent = Mockito.mock(ContentNode.class);
+    Mockito.when(parent.getAttribute(attribute)).thenReturn(null);
+    CalcExpressionMacro.Attributes calculationAttributes
+        = CalcExpressionMacro.getCalculationAttributes(parent, null);
+
+    Assertions.assertNull(calculationAttributes.getAttribute(attribute));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
+  void getCalculationAttributesReturnsNullIfAttributesNotFound(String attribute) {
+    ContentNode parent = Mockito.mock(ContentNode.class);
+    Mockito.when(parent.getAttribute(attribute)).thenReturn(null);
+    CalcExpressionMacro.Attributes calculationAttributes
+        = CalcExpressionMacro.getCalculationAttributes(parent, Collections.emptyMap());
+
+    Assertions.assertNull(calculationAttributes.getAttribute(attribute));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
+  void getCalculationAttributesReturnsValueIfAttributesProvidedAtParent(String attribute) {
+    String value = UUID.randomUUID().toString();
+
+    ContentNode parent = Mockito.mock(ContentNode.class);
+    Mockito.when(parent.getAttribute(attribute)).thenReturn(value);
+    CalcExpressionMacro.Attributes calculationAttributes
+        = CalcExpressionMacro.getCalculationAttributes(parent, Collections.emptyMap());
+
+    Assertions.assertEquals(value, calculationAttributes.getAttribute(attribute));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {Macro.Key.AUTHOR, Macro.Key.LICENSE_TYPE})
+  void getCalculationAttributesReturnsValueIfAttributesProvidedAtMacro(String attribute) {
+    String value = UUID.randomUUID().toString();
+
+    ContentNode parent = Mockito.mock(ContentNode.class);
+    CalcExpressionMacro.Attributes calculationAttributes
+        = CalcExpressionMacro.getCalculationAttributes(parent, Map.of(attribute, value));
+
+    Assertions.assertEquals(value, calculationAttributes.getAttribute(attribute));
   }
 }
