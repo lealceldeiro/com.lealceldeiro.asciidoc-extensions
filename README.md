@@ -319,3 +319,8 @@ For the time being,
 the results are being returned as `BigDecimal`s with scale 2 and `RoundingMode.CEILING`.
 I plan to provide ways to customize that, but I haven't had the time yet.
 PRs are welcome.
+
+## Contributing to this project
+
+You can contribute to this project!
+Read [our contribution guidelines](CONTRIBUTING.md).
