@@ -27,7 +27,7 @@
     <asciidoctorj.version>2.5.13</asciidoctorj.version>
     <junit.version>5.11.3</junit.version>
     <central-publishing-maven-plugin.version>0.5.0</central-publishing-maven-plugin.version>
-    <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
     <MathParser.org-mXparser.version>6.1.0</MathParser.org-mXparser.version>
