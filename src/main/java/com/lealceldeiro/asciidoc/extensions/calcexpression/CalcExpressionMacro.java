@@ -14,8 +14,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.asciidoctor.ast.ContentNode;
 import org.asciidoctor.ast.Document;
+import org.asciidoctor.ast.PhraseNode;
+import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.Format;
 import org.asciidoctor.extension.FormatType;
 import org.asciidoctor.extension.InlineMacroProcessor;
@@ -68,7 +69,7 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
   public static final String LICENSE_TYPE_NON_COMMERCIAL_VALUE = "non_commercial";
 
   @Override
-  public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
+  public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
     Attributes attrs = getCalculationAttributes(parent.getDocument(), attributes);
     String result = calculate(target, attrs);
 

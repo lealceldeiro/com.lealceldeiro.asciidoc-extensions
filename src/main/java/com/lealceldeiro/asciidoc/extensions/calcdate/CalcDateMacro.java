@@ -6,10 +6,6 @@ import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
-import org.asciidoctor.ast.ContentNode;
-import org.asciidoctor.extension.InlineMacroProcessor;
-import org.asciidoctor.extension.Name;
-import org.asciidoctor.extension.PositionalAttributes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -19,6 +15,11 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import org.asciidoctor.ast.PhraseNode;
+import org.asciidoctor.ast.StructuralNode;
+import org.asciidoctor.extension.InlineMacroProcessor;
+import org.asciidoctor.extension.Name;
+import org.asciidoctor.extension.PositionalAttributes;
 
 /**
  * Docs at
@@ -40,7 +41,7 @@ public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<Stri
   static final String MODE_ATTRIBUTE_POSITION = "4";
 
   @Override
-  public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
+  public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
     String calcResult = calculate(target, attributes);
 
     // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
