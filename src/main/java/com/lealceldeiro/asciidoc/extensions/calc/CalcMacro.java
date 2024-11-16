@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import org.asciidoctor.ast.ContentNode;
+import org.asciidoctor.ast.PhraseNode;
+import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.extension.InlineMacroProcessor;
 import org.asciidoctor.extension.Name;
 import org.asciidoctor.extension.PositionalAttributes;
@@ -33,7 +34,7 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
   static final String MODE_ATTRIBUTE_POSITION = "1";
 
   @Override
-  public Object process(ContentNode parent, String target, Map<String, Object> attributes) {
+  public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
     String calcResult = calculate(target, attributes);
 
     // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method

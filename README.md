@@ -18,6 +18,11 @@ It's intended to be used along with the
 [Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/) or a similar
 tool that allows importing this dependency as an Asciidoctor Java extension.
 
+## Compatibility
+
+- `com.lealceldeiro:asciidoc-extensions:0` is compatible with `org.asciidoctor:asciidoctorj:2.5.13`
+- `com.lealceldeiro:asciidoc-extensions:1` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`
+
 ## Adding it to your project
 
 Add the dependency to your `pom.xml` file as follows:
