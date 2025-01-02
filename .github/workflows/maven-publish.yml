@@ -44,7 +44,7 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
 
     - name: Verify with Sonar
-      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
+      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar -Dsonar.projectKey=lealceldeiro-com_com-lealceldeiro-asciidoc-extensions --file pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
