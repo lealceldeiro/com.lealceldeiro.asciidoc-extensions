@@ -20,8 +20,8 @@ tool that allows importing this dependency as an Asciidoctor Java extension.
 
 ## Compatibility
 
-- `com.lealceldeiro:asciidoc-extensions:0` is compatible with `org.asciidoctor:asciidoctorj:2.5.13`
-- `com.lealceldeiro:asciidoc-extensions:1` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`
+- `com.lealceldeiro:asciidoc-extensions:0.*.*` is compatible with `org.asciidoctor:asciidoctorj:2.5.13`
+- `com.lealceldeiro:asciidoc-extensions:1.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`
 
 ## Adding it to your project
 
