@@ -22,7 +22,7 @@ tool that allows importing this dependency as an Asciidoctor Java extension.
 
 - `com.lealceldeiro:asciidoc-extensions:0.*.*` is compatible with `org.asciidoctor:asciidoctorj:2.5.13`, Java 11
 - `com.lealceldeiro:asciidoc-extensions:1.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 11
-- `com.lealceldeiro:asciidoc-extensions:2.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 17
+- `com.lealceldeiro:asciidoc-extensions:2.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 21
 
 ## Adding it to your project
 
