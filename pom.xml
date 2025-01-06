@@ -31,7 +31,7 @@
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
     <MathParser.org-mXparser.version>6.1.0</MathParser.org-mXparser.version>
-    <mockito.version>5.14.2</mockito.version>
+    <mockito.version>5.15.2</mockito.version>
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
   </properties>
 
