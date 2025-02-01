@@ -11,12 +11,13 @@
 
 
 This project was born from my need to evaluate some simple mathematical expressions
-within Asciidoc files and
+within _AsciiDoc_ files and
 output their results in the final generated document.
 
-It's intended to be used along with the
-[Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/) or a similar
-tool that allows importing this dependency as an Asciidoctor Java extension.
+It is intended to be used along with the
+[Asciidoctor Maven Plugin](https://docs.asciidoctor.org/maven-tools/latest/),
+the [IntelliJ AsciiDoc Plugin](https://intellij-asciidoc-plugin.ahus1.de/docs/users-guide/index.html),
+or a similar tool that allows importing this dependency as an Asciidoctor Java extension.
 
 ## Compatibility
 
@@ -25,6 +26,8 @@ tool that allows importing this dependency as an Asciidoctor Java extension.
 - `com.lealceldeiro:asciidoc-extensions:2.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 21
 
 ## Adding it to your project
+
+### Asciidoctor Maven Plugin
 
 Add the dependency to your `pom.xml` file as follows:
 
@@ -37,15 +40,32 @@ Add the dependency to your `pom.xml` file as follows:
 ```
 
 To check what's the latest version you can use, as well as for other build tools,
-please check https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions
+please check https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions.
 
-That's it,
+That is it,
 the macros will be registered automatically for you
 once the dependency is in your project's classpath.
 
-For more info on how it's automatically registered for you,
+For more info on how it is automatically registered for you,
 please check the [Maven Plugin Configuration section](https://docs.asciidoctor.org/maven-tools/latest/plugin/goals/process-asciidoc/#configuration)
 and [AsciidoctorJ's Extension API](https://docs.asciidoctor.org/asciidoctorj/latest/extensions/register-extensions-automatically/).
+
+### IntelliJ AsciiDoc Plugin
+
+Starting from version `2.1.0`, this extension can be used along with the
+[IntelliJ AsciiDoc Plugin](https://intellij-asciidoc-plugin.ahus1.de/docs/users-guide/index.html).
+To know how this type of extensions can be used along with the plugin, please refer to the plugin
+[official documentation](https://intellij-asciidoc-plugin.ahus1.de/docs/users-guide/features/advanced/asciidoctor-extensions.html).
+Make sure the [dependency](https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions/versions)
+(jar file) you use to be added to your project classpath is the one ending with
+`jar-with-dependencies.jar`.
+For example `asciidoc-extensions-2.1.0-jar-with-dependencies.jar` (replace `2.1.0` with the
+latest version available in Maven).
+
+It is important to notice that the jar-with-dependencies that is used for this purpose
+contains a dependency to https://central.sonatype.com/artifact/org.mariuszgromada.math/MathParser.org-mXparser.
+Make sure you read the section for the `calc_exp` macro shown below,
+for more information about this.
 
 ## The macros
 So far it includes three inline macros:
@@ -216,7 +236,7 @@ calc_date:sum[2024-01-01, 2, format="j0", ignore_invalid]
 This macro is a wrapper around https://mathparser.org/. This means the actual logic to
 calculate whatever expression is passed to the macro is performed by https://mathparser.org/
 
-Before continue reading, it's important that you understand that this software doesn’t grant
+Before continue reading, it is important that you understand that this software doesn’t grant
 you any type of license for use of https://mathparser.org/.
 
 While this software is [licensed under MIT](./LICENSE),
@@ -283,7 +303,7 @@ calc_exp:[exp=3 ^ 2, author=Johnny, calc_exp_license_type=commercial]
 
 ### Invalid values
 
-If there's an invalid `author` value a `NaA` is returned.
+If there is an invalid `author` value a `NaA` is returned.
 A special case is when
 the value is shorter than `5` characters, where you get a `NaVA` (this
 special case is due to the underlying library)
@@ -300,7 +320,7 @@ calc_exp:[exp=3 ^ 2, calc_exp_license_type=non_commercial]
 calc_exp:[exp=3 ^ 2, author=John, calc_exp_license_type=non_commercial]
 ```
 
-If there's an invalid value for `calc_exp_license_type`,
+If there is an invalid value for `calc_exp_license_type`,
 then a `NaL` is reported.
 Example:
 
@@ -310,8 +330,8 @@ Example:
 calc_exp:[exp=3 ^ 2, author=Johnny, calc_exp_license_type=testing]
 ```
 
-If there's a failure while trying to evaluate the expression
-then there's an `NaE` returned.
+If there is a failure while trying to evaluate the expression
+then there is an `NaE` returned.
 Example:
 
 ```asciidoc
