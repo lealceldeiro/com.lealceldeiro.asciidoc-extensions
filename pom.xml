@@ -25,7 +25,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <asciidoctorj.version>3.0.0</asciidoctorj.version>
-    <junit.version>5.11.4</junit.version>
+    <junit.version>5.12.1</junit.version>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
