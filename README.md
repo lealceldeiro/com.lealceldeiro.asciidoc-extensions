@@ -171,6 +171,41 @@ For example:
 calc_date:sub[2024-01-01, 1y, format="MMM d, yyyy"]
 ```
 
+Additionally, you can specify the _source_ and _target_ zone ids for the date being handled.
+This is useful when you want the output date rendered in a different timezone than the one
+in which the original date was provided (i.e: the zone for the "machine" where the document is
+being rendered).
+
+If no values are provided for the source and target zone ids,
+or they're invalid zone id values, then the
+[system default zone id](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZoneId.html#systemDefault())
+is used.
+
+For example, assuming the document is being rendered at `12:24` in a machine running in the
+`America/Adak` timezone and the target timezone is `Pacific/Tarawa`, then the following call
+would return `2025-08-31` as the result::
+
+```asciidoc
+// outputs 2025-08-31
+calc_date:sub[2025-08-30, 0, to_zone_id="Pacific/Tarawa"]
+```
+
+Let's see other examples, all of them assuming the document is generated at
+(UTC) `2025-08-30T21:24:00.000[UTC]`.
+For simplicity, the amount to be subtracted is always `0`.:
+
+```asciidoc
+// outputs 2025-08-31
+calc_date:sub[2025-08-30, 0, from_zone_id="America/Adak", to_zone_id="Pacific/Tarawa"]
+```
+
+```asciidoc
+// outputs 2025-08-29
+// in Athens, it's 30th at 00:24:00, so when converted to UTC (21:24:00),
+// then it's "moved back" to the previous day
+calc_date:sub[2025-08-30, 0, from_zone_id="Europe/Athens", to_zone_id="UTC"]
+```
+
 ### Invalid arguments
 
 If the `calc_date` macro isn't provided with a valid operation, that's it,
