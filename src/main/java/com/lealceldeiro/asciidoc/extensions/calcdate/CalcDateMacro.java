@@ -7,6 +7,9 @@ import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -28,7 +31,10 @@ import org.asciidoctor.extension.PositionalAttributes;
  * </a>
  */
 @Name("calc_date")
-@PositionalAttributes({Macro.Key.DATE, Macro.Key.VALUE, Macro.Key.TARGET_FORMAT, Macro.Key.MODE})
+@PositionalAttributes({
+    Macro.Key.DATE, Macro.Key.VALUE, Macro.Key.TARGET_FORMAT, Macro.Key.MODE,
+    Macro.Key.FROM_ZONE_ID, Macro.Key.TO_ZONE_ID
+})
 public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<String, Object>> {
   private static final ExtensionLogger logger = ExtensionLoggerFactory.getInstance();
 
@@ -39,6 +45,8 @@ public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<Stri
   static final String AMOUNT_ATTRIBUTE_POSITION = "2";
   static final String TARGET_FORMAT_ATTRIBUTE_POSITION = "3";
   static final String MODE_ATTRIBUTE_POSITION = "4";
+  static final String FROM_ZONE_ID_ATTRIBUTE_POSITION = "5";
+  static final String TO_ZONE_ID_ATTRIBUTE_POSITION = "6";
 
   @Override
   public PhraseNode process(StructuralNode parent, String target, Map<String, Object> attributes) {
@@ -79,19 +87,53 @@ public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<Stri
     TemporalUnit unit = getTemporalUnit(attributes);
 
     LocalDate date = optionalDate.get();
+    ZoneId srcZoneId = getSrcZoneId(attributes);
+    ZoneId targetZoneId = getTargetZoneId(attributes);
+    LocalDateTime now = LocalDateTime.now(srcZoneId);
+    ZonedDateTime zonedDateTime = ZonedDateTime.of(date, now.toLocalTime(), srcZoneId);
     long amount = optionalAmount.get();
     logger.log(this, "Performing " + operation
-                     + " on date: " + date
+                     + " on date: " + zonedDateTime
                      + " with amount: " + amount
                      + " and formatter: " + formatter);
 
     if (operation.equals(Operator.SUM)) {
-      return formatter.format(date.plus(amount, unit));
+      LocalDate dateAtTarget = zonedDateTime.plus(amount, unit)
+                                            .withZoneSameInstant(targetZoneId)
+                                            .toLocalDate();
+      return formatter.format(dateAtTarget);
     }
     if (operation.equals(Operator.SUB)) {
-      return formatter.format(date.minus(amount, unit));
+      LocalDate dateAtTarget = zonedDateTime.minus(amount, unit)
+                                            .withZoneSameInstant(targetZoneId)
+                                            .toLocalDate();
+      return formatter.format(dateAtTarget);
     }
     return InvalidValue.NOT_AN_OPERATION;
+  }
+
+  private ZoneId getSrcZoneId(Map<String, Object> attributes) {
+    return zoneId(attributes, Macro.Key.FROM_ZONE_ID, FROM_ZONE_ID_ATTRIBUTE_POSITION);
+  }
+
+  private ZoneId getTargetZoneId(Map<String, Object> attributes) {
+    return zoneId(attributes, Macro.Key.TO_ZONE_ID, TO_ZONE_ID_ATTRIBUTE_POSITION);
+  }
+
+  private ZoneId zoneId(Map<String, Object> attributes, String key, String position) {
+    Object id = attributes.getOrDefault(key,
+                                        attributes.getOrDefault(position,
+                                                                ZoneId.systemDefault().getId()));
+    return Optional.ofNullable(id)
+                   .map(Object::toString)
+                   .map(candidateId -> {
+                     try {
+                       return ZoneId.of(candidateId);
+                     } catch (RuntimeException e) {
+                       return ZoneId.systemDefault();
+                     }
+                   })
+                   .orElseGet(ZoneId::systemDefault);
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
@@ -163,14 +205,10 @@ public class CalcDateMacro extends InlineMacroProcessor implements Calc<Map<Stri
     if (valueString.endsWith(DAY) || valueString.endsWith(MONTH) || valueString.endsWith(YEAR)) {
       rawValue = valueString.substring(valueString.length() - 1);
     }
-    switch (rawValue) {
-      case YEAR:
-        return ChronoUnit.YEARS;
-      case MONTH:
-        return ChronoUnit.MONTHS;
-      case DAY:
-      default:
-        return ChronoUnit.DAYS;
-    }
+    return switch (rawValue) {
+      case YEAR -> ChronoUnit.YEARS;
+      case MONTH -> ChronoUnit.MONTHS;
+      default -> ChronoUnit.DAYS;
+    };
   }
 }

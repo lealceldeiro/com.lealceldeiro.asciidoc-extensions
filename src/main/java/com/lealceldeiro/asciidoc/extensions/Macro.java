@@ -12,6 +12,8 @@ public final class Macro {
     public static final String DATE = "date";
     public static final String VALUE = "value";
     public static final String TARGET_FORMAT = "format";
+    public static final String FROM_ZONE_ID = "from_zone_id";
+    public static final String TO_ZONE_ID = "to_zone_id";
 
     public static final String EXP = "exp";
     public static final String AUTHOR = "author";
