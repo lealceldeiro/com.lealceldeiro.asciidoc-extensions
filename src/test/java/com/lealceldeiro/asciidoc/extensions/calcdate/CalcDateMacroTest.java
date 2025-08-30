@@ -29,8 +29,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 class CalcDateMacroTest {
-
-  public static final String NO_ZONE_ID = "-";
+  private static final String NO_ZONE_ID = "-";
 
   static Stream<Arguments> calculateSrc() {
     return Stream.of(
