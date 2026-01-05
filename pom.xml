@@ -24,7 +24,7 @@
     <gpg.keyname>0xC0DDD34A</gpg.keyname>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <asciidoctorj.version>3.0.0</asciidoctorj.version>
+    <asciidoctorj.version>3.0.1</asciidoctorj.version>
     <junit.version>6.0.1</junit.version>
     <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
