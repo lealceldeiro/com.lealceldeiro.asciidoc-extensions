@@ -39,7 +39,7 @@ Add the dependency to your `pom.xml` file as follows:
 </dependency>
 ```
 
-To check what's the latest version you can use, as well as for other build tools,
+To check what the latest version you can use is, as well as for other build tools,
 please check https://central.sonatype.com/artifact/com.lealceldeiro/asciidoc-extensions.
 
 That is it,
