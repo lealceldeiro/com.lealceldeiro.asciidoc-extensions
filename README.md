@@ -22,8 +22,9 @@ or a similar tool that allows importing this dependency as an Asciidoctor Java e
 ## Compatibility
 
 - `com.lealceldeiro:asciidoc-extensions:0.*.*` is compatible with `org.asciidoctor:asciidoctorj:2.5.13`, Java 11
-- `com.lealceldeiro:asciidoc-extensions:1.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 11
-- `com.lealceldeiro:asciidoc-extensions:2.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.0.0`, Java 21
+- `com.lealceldeiro:asciidoc-extensions:1.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 11
+- `com.lealceldeiro:asciidoc-extensions:2.2.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 21
+- `com.lealceldeiro:asciidoc-extensions:2.3.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 25
 
 ## Adding it to your project
 
@@ -103,6 +104,25 @@ It allows for attributes substitution as well. Example:
 // outputs 150
 calc:multiply[{price}, {units}]
 ```
+
+### Rounding
+
+Starting from version `2.3.0`, you can now specify what rounding mode to use by setting the
+attribute `rounding_mode`, for example:
+
+```asciidoc
+// outputs 0.97
+calc:sum[rounding_mode="CEILING", 0.471, 0.49]
+```
+
+If not specified, by default, it uses
+[`HALF_EVEN`](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html#HALF_EVEN).
+
+Other values can be specified as well. These can be any of the enum values specified by the
+[RoundingMode](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html)
+java class.
+
+The value returned is always set to use a BigDecimal scale of `2`.
 
 ### Invalid arguments
 
@@ -377,7 +397,7 @@ calc_exp:[exp=3 ^, author=Johnny, calc_exp_license_type=non_commercial]
 ## Limitations
 
 For the time being,
-the results are being returned as `BigDecimal`s with scale 2 and `RoundingMode.CEILING`.
+the results are being returned as `BigDecimal`s with scale 2.
 I plan to provide ways to customize that, but I haven't had the time yet.
 PRs are welcome.
 
@@ -385,3 +405,9 @@ PRs are welcome.
 
 You can contribute to this project!
 Read [our contribution guidelines](CONTRIBUTING.md).
+
+## List of breaking changes
+
+### Rounding mode in `calc` expression.
+
+The default rounding mode used to be `RoundingMode.CEILING`. It changed to `RoundingMode.HALF_EVEN`.

@@ -8,6 +8,7 @@ import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -137,7 +138,59 @@ class CalcMacroTest {
                   "-4.00"),
         arguments(Operator.DIVIDE,
                   Map.of(Macro.Key.MODE, Macro.Value.IGNORE_INVALID, "0", "not a number", "1", "2"),
-                  "2.00")
+                  "2.00"),
+        // rounding
+        arguments(Operator.SUM,
+                  Map.of("0", "0.21",
+                         "1", "0.21"),
+                  "0.42"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.31",
+                         "1", "0.21"),
+                  "0.52"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.47",
+                         "1", "0.42"),
+                  "0.89"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.47",
+                         "1", "0.49"),
+                  "0.96"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.471",
+                         "1", "0.49"),
+                  // default rounding mode: HALF_EVEN
+                  "0.96"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.471",
+                         "1", "0.49",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.CEILING.toString()),
+                  "0.97"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.474",
+                         "1", "0.494",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.CEILING.toString()),
+                  "0.97"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.475",
+                         "1", "0.495",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.CEILING.toString()),
+                  "0.97"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.471",
+                         "1", "0.49",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString()),
+                  "0.96"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.474",
+                         "1", "0.494",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString()),
+                  "0.96"),
+        arguments(Operator.SUM,
+                  Map.of("0", "0.475",
+                         "1", "0.495",
+                         Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString()),
+                  "0.97")
                     );
   }
 
@@ -151,7 +204,8 @@ class CalcMacroTest {
       Calc<Map<String, Object>> calcMacro = new CalcMacro();
       String result = calcMacro.calculate(operation, attributes);
 
-      Assertions.assertEquals(expected, result);
+      Assertions.assertEquals(expected, result,
+                              "operation: " + operation + ", attributes: " + attributes);
     }
   }
 }

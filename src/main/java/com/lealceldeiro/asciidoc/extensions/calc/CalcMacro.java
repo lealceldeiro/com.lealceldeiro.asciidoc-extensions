@@ -76,14 +76,37 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
         return InvalidValue.NOT_AN_OPERATION;
     }
 
-    return value.map(val -> val.setScale(2, RoundingMode.CEILING))
+    RoundingMode roundingMode = roundingMode(attributes);
+    return value.map(val -> val.setScale(2, roundingMode))
                 .map(BigDecimal::toString)
                 .orElse(InvalidValue.NOT_A_VALID_MATH);
   }
 
+  private RoundingMode roundingMode(Map<String, Object> attributes) {
+    Object specifiedRoundingMode = attributes.get(Macro.Key.ROUNDING_MODE);
+    if (specifiedRoundingMode instanceof String modeString) {
+      try {
+        return RoundingMode.valueOf(modeString);
+      } catch (IllegalArgumentException e) {
+        logger.log(this, "Invalid rounding mode: " + modeString);
+      }
+    } else {
+      logger.log(this, "Rounding mode not set");
+    }
+
+    return RoundingMode.HALF_EVEN;
+  }
+
   private static int positionalAttributesCount(Map<String, Object> attributes) {
-    return (attributes.containsKey(Macro.Key.MODE)
-            || Macro.Value.IGNORE_INVALID.equals(attributes.get(MODE_ATTRIBUTE_POSITION))) ? 1 : 0;
+    int configAttributeCount = 0;
+    if (attributes.containsKey(Macro.Key.MODE)
+        || Macro.Value.IGNORE_INVALID.equals(attributes.get(MODE_ATTRIBUTE_POSITION))) {
+      configAttributeCount++;
+    }
+    if (attributes.containsKey(Macro.Key.ROUNDING_MODE)) {
+      configAttributeCount++;
+    }
+    return configAttributeCount;
   }
 
   private static boolean ignoreInvalid(Map<String, Object> attributes) {
@@ -94,9 +117,8 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
   private List<BigDecimal> getNumbers(Map<String, Object> attributes) {
     return attributes.entrySet()
                      .stream()
-                     .filter(entry -> !Macro.Key.MODE.equals(entry.getKey())
-                                      && !(MODE_ATTRIBUTE_POSITION.equals(entry.getKey())
-                                           && Macro.Value.IGNORE_INVALID.equals(entry.getValue())))
+                     .filter(entry -> !isModeConfigEntry(entry)
+                                      && !isIgnoreInvalidConfigEntry(entry))
                      .filter(entry -> isIntValue(entry.getKey()))
                      .sorted((entry1, entry2) -> {
                        int key1 = Integer.parseInt(entry1.getKey());
@@ -108,6 +130,15 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
                      .filter(Optional::isPresent)
                      .map(Optional::get)
                      .collect(Collectors.toList());
+  }
+
+  private static boolean isModeConfigEntry(Map.Entry<String, Object> entry) {
+    return Macro.Key.MODE.equals(entry.getKey());
+  }
+
+  private static boolean isIgnoreInvalidConfigEntry(Map.Entry<String, Object> entry) {
+    return MODE_ATTRIBUTE_POSITION.equals(entry.getKey())
+           && Macro.Value.IGNORE_INVALID.equals(entry.getValue());
   }
 
   private static boolean isIntValue(String rawValue) {
