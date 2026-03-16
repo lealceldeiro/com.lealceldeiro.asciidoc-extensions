@@ -6,6 +6,7 @@ import static com.lealceldeiro.asciidoc.extensions.Macro.Key.LICENSE_TYPE;
 
 import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
+import com.lealceldeiro.asciidoc.extensions.Util;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
@@ -117,7 +118,10 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
     }
 
     confirmXParserLicence(author, licenseType);
-    return evaluate(expression);
+
+    RoundingMode roundingMode = Util.roundingMode(this, attributes.macroAttributes);
+
+    return evaluate(expression, roundingMode);
   }
 
   private static String getAttribute(String attrName, Attributes attributes,
@@ -153,11 +157,11 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
     }
   }
 
-  private String evaluate(String expression) {
+  private String evaluate(String expression, RoundingMode roundingMode) {
     logger.log(this, "Expression: " + expression);
 
     return evalExpression(expression).map(BigDecimal::new)
-                                     .map(value -> value.setScale(2, RoundingMode.CEILING))
+                                     .map(value -> value.setScale(2, roundingMode))
                                      .map(BigDecimal::toString)
                                      .orElse(InvalidValue.NOT_AN_EXPRESSION);
   }

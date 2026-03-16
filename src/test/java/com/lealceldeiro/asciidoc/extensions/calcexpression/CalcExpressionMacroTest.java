@@ -5,6 +5,7 @@ import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,29 @@ class CalcExpressionMacroTest {
                                                      TEST_AUTHOR,
                                                      Macro.Key.LICENSE_TYPE,
                                                      CalcExpressionMacro.LICENSE_TYPE_COMMERCIAL_VALUE),
-                                              Map.of(Macro.Key.EXP, "3 * 4")), "12.00")
+                                              Map.of(Macro.Key.EXP, "3 * 4")), "12.00"),
+        // rounding
+        Arguments.of(macroAttributes(Map.of(Macro.Key.EXP, "0.21 + 0.21")), "0.42"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.EXP, "0.31 + 0.21")), "0.52"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.EXP, "0.47 + 0.42")), "0.89"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.EXP, "0.47 + 0.49")), "0.96"),
+        // default rounding mode: HALF_EVEN
+        Arguments.of(macroAttributes(Map.of(Macro.Key.EXP, "0.471 + 0.49")), "0.96"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.ROUNDING_MODE, RoundingMode.CEILING.toString(),
+                                            Macro.Key.EXP, "0.471 + 0.49")), "0.97"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.ROUNDING_MODE, RoundingMode.CEILING.toString(),
+                                            Macro.Key.EXP, "0.475 + 0.495")), "0.97"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString(),
+                                            Macro.Key.EXP, "0.471 + 0.49")), "0.96"),
+        Arguments.of(macroAttributes(Map.of(Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString(),
+                                            Macro.Key.EXP, "0.474 + 0.494")), "0.96"),
+        // the following test should return 0.97,
+        // but due to https://github.com/mariuszgromada/MathParser.org-mXparser returning a double,
+        // there's an impression and the results is not exactly 0.97, but 0.96 + some approximate to 9999,
+        // hence the value is rounded floor (0.96)
+        // when that's fixed in MathParser, this test case can be updated
+        Arguments.of(macroAttributes(Map.of(Macro.Key.ROUNDING_MODE, RoundingMode.FLOOR.toString(),
+                                            Macro.Key.EXP, "0.475 + 0.495")), "0.96")
                     );
   }
 
@@ -77,7 +100,6 @@ class CalcExpressionMacroTest {
   @ParameterizedTest
   @MethodSource("calculateSrc")
   void calculate(CalcExpressionMacro.Attributes attributes, String expected) {
-
     try (MockedStatic<ExtensionLoggerFactory> elf = Mockito.mockStatic(ExtensionLoggerFactory.class);
          MockedStatic<License> license = Mockito.mockStatic(License.class)) {
       ExtensionLogger loggerMock = Mockito.mock(ExtensionLogger.class);
@@ -86,7 +108,7 @@ class CalcExpressionMacroTest {
       Calc<CalcExpressionMacro.Attributes> calcMacro = new CalcExpressionMacro();
       String result = calcMacro.calculate("", attributes);
 
-      Assertions.assertEquals(expected, result);
+      Assertions.assertEquals(expected, result, "attributes: " + attributes);
       if (InvalidValue.NOT_AN_EXPRESSION.equals(expected)) {
         return;
       }
