@@ -18,6 +18,8 @@ public final class Macro {
     public static final String EXP = "exp";
     public static final String AUTHOR = "author";
     public static final String LICENSE_TYPE = "calc_exp_license_type";
+
+    public static final String ROUNDING_MODE = "rounding_mode";
   }
 
   public static final class Value {

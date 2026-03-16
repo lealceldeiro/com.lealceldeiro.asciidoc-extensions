@@ -4,6 +4,7 @@
 
 - On the `main` branch, do `git pull`
 - Create a new chore branch and bump the maven project version--push the changes
+- (this can be done in a feature branch too when working on a new change and that release will contain only that feature/change)
 - Open a PR from the newly created branch
 - Merge the PR once it is ready
 - On the `main` branch, do `git pull` again
