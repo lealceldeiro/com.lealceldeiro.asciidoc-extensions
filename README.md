@@ -361,6 +361,19 @@ Example, setting the author and license type at the macro level:
 calc_exp:[exp=3 ^ 2, author=Johnny, calc_exp_license_type=commercial]
 ```
 
+### Rounding in calc_exp
+
+Similar to `calc`, starting from version `2.3.1`, you can now specify what rounding mode to use
+by setting the attribute `rounding_mode`, for example:
+
+```asciidoc
+// outputs 0.97
+calc_exp:[exp=0.471 + 0.49, author=Johnny, calc_exp_license_type=non_commercial, rounding_mode="CEILING"]
+```
+
+For more info about how to use the rounding_mode attribute, see section
+[`Rounding in calc`](README.md#rounding-in-calc). The usage is the same as in this macro.
+
 ### Invalid values
 
 If there is an invalid `author` value a `NaA` is returned.
@@ -399,23 +412,6 @@ Example:
 calc_exp:[exp=3 ^, author=Johnny, calc_exp_license_type=non_commercial]
 ```
 
-### Rounding in calc_exp
-
-Similar to `calc`, starting from version `2.3.1`, you can now specify what rounding mode to use
-by setting the attribute `rounding_mode`, for example:
-
-```asciidoc
-// outputs 0.97
-calc_exp:[exp=0.471 + 0.49, author=Johnny, calc_exp_license_type=non_commercial, rounding_mode="CEILING"]
-```
-
-For more info about how to use the [`rounding_mode`](README.md#rounding-in-calc) attribute, see 
-
-## Contributing to this project
-
-You can contribute to this project!
-Read [our contribution guidelines](CONTRIBUTING.md).
-
 ## List of breaking changes
 
 ### Rounding mode in `calc` macro
@@ -425,3 +421,8 @@ The default rounding mode used to be `RoundingMode.CEILING`. It changed to `Roun
 ### Rounding mode in `calc_exp` macro
 
 The default rounding mode used to be `RoundingMode.CEILING`. It changed to `RoundingMode.HALF_EVEN`.
+
+## Contributing to this project
+
+You can contribute to this project!
+Read [our contribution guidelines](CONTRIBUTING.md).
