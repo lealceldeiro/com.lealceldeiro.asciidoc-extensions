@@ -4,6 +4,7 @@ import com.lealceldeiro.asciidoc.extensions.Calc;
 import com.lealceldeiro.asciidoc.extensions.InvalidValue;
 import com.lealceldeiro.asciidoc.extensions.Macro;
 import com.lealceldeiro.asciidoc.extensions.Operator;
+import com.lealceldeiro.asciidoc.extensions.Util;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
@@ -76,26 +77,12 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
         return InvalidValue.NOT_AN_OPERATION;
     }
 
-    RoundingMode roundingMode = roundingMode(attributes);
+    RoundingMode roundingMode = Util.roundingMode(this, attributes);
     return value.map(val -> val.setScale(2, roundingMode))
                 .map(BigDecimal::toString)
                 .orElse(InvalidValue.NOT_A_VALID_MATH);
   }
 
-  private RoundingMode roundingMode(Map<String, Object> attributes) {
-    Object specifiedRoundingMode = attributes.get(Macro.Key.ROUNDING_MODE);
-    if (specifiedRoundingMode instanceof String modeString) {
-      try {
-        return RoundingMode.valueOf(modeString);
-      } catch (IllegalArgumentException e) {
-        logger.log(this, "Invalid rounding mode: " + modeString);
-      }
-    } else {
-      logger.log(this, "Rounding mode not set");
-    }
-
-    return RoundingMode.HALF_EVEN;
-  }
 
   private static int positionalAttributesCount(Map<String, Object> attributes) {
     int configAttributeCount = 0;

@@ -105,7 +105,7 @@ It allows for attributes substitution as well. Example:
 calc:multiply[{price}, {units}]
 ```
 
-### Rounding
+### Rounding in `calc`
 
 Starting from version `2.3.0`, you can now specify what rounding mode to use by setting the
 attribute `rounding_mode`, for example:
@@ -122,7 +122,12 @@ Other values can be specified as well. These can be any of the enum values speci
 [RoundingMode](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html)
 java class.
 
-The value returned is always set to use a BigDecimal scale of `2`.
+#### Limitations
+
+For the time being,
+the results are being returned as `BigDecimal`s with scale 2.
+I plan to provide ways to customize that, but I haven't had the time yet.
+PRs are welcome.
 
 ### Invalid arguments
 
@@ -394,12 +399,17 @@ Example:
 calc_exp:[exp=3 ^, author=Johnny, calc_exp_license_type=non_commercial]
 ```
 
-## Limitations
+### Rounding in calc_exp
 
-For the time being,
-the results are being returned as `BigDecimal`s with scale 2.
-I plan to provide ways to customize that, but I haven't had the time yet.
-PRs are welcome.
+Similar to `calc`, starting from version `2.3.1`, you can now specify what rounding mode to use
+by setting the attribute `rounding_mode`, for example:
+
+```asciidoc
+// outputs 0.97
+calc_exp:[exp=0.471 + 0.49, author=Johnny, calc_exp_license_type=non_commercial, rounding_mode="CEILING"]
+```
+
+For more info about how to use the [`rounding_mode`](README.md#rounding-in-calc) attribute, see 
 
 ## Contributing to this project
 
@@ -408,6 +418,10 @@ Read [our contribution guidelines](CONTRIBUTING.md).
 
 ## List of breaking changes
 
-### Rounding mode in `calc` expression.
+### Rounding mode in `calc` macro
+
+The default rounding mode used to be `RoundingMode.CEILING`. It changed to `RoundingMode.HALF_EVEN`.
+
+### Rounding mode in `calc_exp` macro
 
 The default rounding mode used to be `RoundingMode.CEILING`. It changed to `RoundingMode.HALF_EVEN`.
