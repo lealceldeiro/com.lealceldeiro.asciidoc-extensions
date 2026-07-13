@@ -9,8 +9,11 @@ import org.junit.jupiter.api.Test;
 class ChartBlockParserTest {
   @Test
   void substitutesKnownAttributesAndBlanksUnknownOnes() {
+    // AsciiDoc downcases all document attribute names, so a real document attribute
+    // is only ever available under its lowercased key even though authors reference
+    // it in the original casing (e.g. {aprFamily}).
     String out = ChartBlockParser.substituteAttributes(
-        "Family: {aprFamily},{missing},3", Map.of("aprFamily", "5568.09"));
+        "Family: {aprFamily},{missing},3", Map.of("aprfamily", "5568.09"));
     Assertions.assertEquals("Family: 5568.09,,3", out);
   }
 

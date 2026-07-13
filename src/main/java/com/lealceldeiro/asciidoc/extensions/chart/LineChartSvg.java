@@ -15,6 +15,9 @@ public final class LineChartSvg {
   private static final int PAD_TOP = 24;
   private static final int PAD_BOTTOM = 40;
   private static final int TARGET_TICKS = 4;
+  private static final int LEGEND_COLUMNS = 4;
+  private static final double LEGEND_COLUMN_WIDTH = 80.0;
+  private static final double LEGEND_ROW_HEIGHT = 14.0;
 
   private LineChartSvg() {
   }
@@ -153,21 +156,25 @@ public final class LineChartSvg {
   }
 
   private static void appendLegend(StringBuilder svg, List<ChartSeries> series, double plotRight) {
-    double y = 12;
-    // lay entries left-to-right, ending near the right edge of the plot
-    double startX = plotRight - Math.min(series.size(), 4) * 80.0;
+    // Lay entries left-to-right in rows of at most LEGEND_COLUMNS, wrapping to a
+    // new row (stacked downward) instead of running off the right edge for a
+    // 5th+ series. Each row ends near the right edge of the plot.
+    int columns = Math.min(series.size(), LEGEND_COLUMNS);
+    double startX = plotRight - columns * LEGEND_COLUMN_WIDTH;
     if (startX < 60) {
       startX = 60;
     }
-    double lx = startX;
     for (int s = 0; s < series.size(); s++) {
+      int col = s % LEGEND_COLUMNS;
+      int row = s / LEGEND_COLUMNS;
+      double lx = startX + col * LEGEND_COLUMN_WIDTH;
+      double ly = 12 + row * LEGEND_ROW_HEIGHT;
       String color = PALETTE.get(s % PALETTE.size());
-      svg.append("<rect x=\"").append(fmt(lx)).append("\" y=\"").append(fmt(y))
+      svg.append("<rect x=\"").append(fmt(lx)).append("\" y=\"").append(fmt(ly))
          .append("\" width=\"11\" height=\"11\" fill=\"").append(color).append("\"/>\n");
-      svg.append("<text x=\"").append(fmt(lx + 15)).append("\" y=\"").append(fmt(y + 10))
+      svg.append("<text x=\"").append(fmt(lx + 15)).append("\" y=\"").append(fmt(ly + 10))
          .append("\" font-size=\"11\" fill=\"#333\">").append(escape(series.get(s).name()))
          .append("</text>\n");
-      lx += 80;
     }
   }
 

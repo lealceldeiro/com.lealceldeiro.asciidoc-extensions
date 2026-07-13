@@ -1,8 +1,11 @@
 package com.lealceldeiro.asciidoc.extensions.chart;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,14 +30,68 @@ class LineChartSvgTest {
   }
 
   @Test
-  void gapsSplitTheLineIntoSeparateSegments() {
-    // present, gap, present, present -> two polyline segments (one point cannot form a segment)
+  void loneLeadingPointBeforeAGapIsDroppedLeavingOneSegment() {
+    // lone present point, gap, present, present -> the lone point can't form a
+    // segment by itself, so only the Mar-Apr pair renders: one polyline.
     List<String> x = List.of("Jan", "Feb", "Mar", "Apr");
     List<ChartSeries> series = List.of(
         new ChartSeries("S", Arrays.asList(bd("10"), null, bd("30"), bd("40"))));
     String svg = LineChartSvg.render(x, series, ChartOptions.defaults());
     int polylineCount = svg.split("<polyline", -1).length - 1;
     Assertions.assertEquals(1, polylineCount, "only the Mar-Apr pair forms a segment");
+  }
+
+  @Test
+  void midSeriesGapSplitsARunIntoTwoSegments() {
+    // two present points, gap, two present points -> both runs have >= 2 points,
+    // so the gap genuinely splits the line into two separate polylines.
+    List<String> x = List.of("Jan", "Feb", "Mar", "Apr", "May");
+    List<ChartSeries> series = List.of(
+        new ChartSeries("S",
+            Arrays.asList(bd("10"), bd("20"), null, bd("40"), bd("50"))));
+    String svg = LineChartSvg.render(x, series, ChartOptions.defaults());
+    int polylineCount = svg.split("<polyline", -1).length - 1;
+    Assertions.assertEquals(2, polylineCount, "Jan-Feb and Apr-May each form a segment");
+  }
+
+  @Test
+  void legendWrapsToMultipleRowsAndStaysWithinChartWidthForManySeries() {
+    List<String> x = List.of("Jan");
+    List<ChartSeries> series = new ArrayList<>();
+    List<String> names = List.of("Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot");
+    for (int i = 0; i < names.size(); i++) {
+      series.add(new ChartSeries(names.get(i), Arrays.asList(bd(String.valueOf(i + 1)))));
+    }
+    ChartOptions opts = ChartOptions.defaults();
+    String svg = LineChartSvg.render(x, series, opts);
+
+    for (String name : names) {
+      Assertions.assertTrue(svg.contains(">" + name + "<"), "missing legend entry: " + name);
+    }
+
+    // Legend swatches are the only <rect> elements with width="11" height="11";
+    // legend labels are the only <text> elements with font-size="11". Neither
+    // should ever be positioned beyond the SVG's own width.
+    List<Double> legendXs = new ArrayList<>();
+    int legendSwatchCount = 0;
+    Matcher rectM = Pattern.compile(
+        "<rect x=\"(-?[0-9.]+)\" y=\"[^\"]*\" width=\"11\" height=\"11\"").matcher(svg);
+    while (rectM.find()) {
+      legendXs.add(Double.parseDouble(rectM.group(1)));
+      legendSwatchCount++;
+    }
+    Matcher textM = Pattern.compile(
+        "<text x=\"(-?[0-9.]+)\"[^>]*font-size=\"11\"").matcher(svg);
+    while (textM.find()) {
+      legendXs.add(Double.parseDouble(textM.group(1)));
+    }
+
+    Assertions.assertEquals(names.size(), legendSwatchCount, "one swatch per series");
+    Assertions.assertFalse(legendXs.isEmpty(), "expected legend coordinates to be found");
+    for (double legendX : legendXs) {
+      Assertions.assertTrue(legendX <= opts.width(),
+          "legend x=" + legendX + " overflows chart width=" + opts.width());
+    }
   }
 
   @Test

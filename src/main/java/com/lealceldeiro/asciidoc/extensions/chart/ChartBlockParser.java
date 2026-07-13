@@ -3,6 +3,7 @@ package com.lealceldeiro.asciidoc.extensions.chart;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +19,9 @@ public final class ChartBlockParser {
     Matcher m = ATTR_REF.matcher(line);
     StringBuilder out = new StringBuilder();
     while (m.find()) {
-      Object value = docAttributes.get(m.group(1));
+      // AsciiDoc downcases all document attribute names, so a reference such as
+      // {aprFamily} is only ever stored under the lowercased key "aprfamily".
+      Object value = docAttributes.get(m.group(1).toLowerCase(Locale.ROOT));
       m.appendReplacement(out, Matcher.quoteReplacement(value == null ? "" : String.valueOf(value)));
     }
     m.appendTail(out);

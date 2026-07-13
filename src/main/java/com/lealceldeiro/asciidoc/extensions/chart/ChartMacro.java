@@ -4,7 +4,6 @@ import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +56,9 @@ public class ChartMacro extends BlockProcessor {
       out.deleteOnExit();
       Files.writeString(out.toPath(), svg);
     } catch (IOException e) {
-      throw new UncheckedIOException("Failed to write chart SVG", e);
+      // Never crash the build over a chart render failure: log and render nothing.
+      logger.log(this, "Failed to write chart SVG: " + e.getMessage());
+      return null;
     }
 
     Map<String, Object> imageAttrs = new HashMap<>();
