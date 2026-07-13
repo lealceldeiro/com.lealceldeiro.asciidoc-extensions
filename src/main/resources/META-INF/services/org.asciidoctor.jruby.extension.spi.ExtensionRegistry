@@ -1,3 +1,4 @@
 com.lealceldeiro.asciidoc.extensions.CalcMacroExtensionRegistry
 com.lealceldeiro.asciidoc.extensions.CalcDateMacroExtensionRegistry
 com.lealceldeiro.asciidoc.extensions.CalcExpressionMacroExtensionRegistry
+com.lealceldeiro.asciidoc.extensions.ChartMacroExtensionRegistry
