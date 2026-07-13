@@ -25,6 +25,7 @@ or a similar tool that allows importing this dependency as an Asciidoctor Java e
 - `com.lealceldeiro:asciidoc-extensions:1.*.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 11
 - `com.lealceldeiro:asciidoc-extensions:2.2.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 21
 - `com.lealceldeiro:asciidoc-extensions:2.3.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 25
+- `com.lealceldeiro:asciidoc-extensions:2.4.*` is compatible with `org.asciidoctor:asciidoctorj:3.*.*`, Java 25
 
 ## Adding it to your project
 
@@ -69,11 +70,15 @@ Make sure you read the section for the `calc_exp` macro shown below,
 for more information about this.
 
 ## The macros
-So far it includes three inline macros:
+It includes three inline macros:
 
 - `calc`
 - `cal_date`
 - `calc_exp`
+
+and, starting from version `2.4.0`, one block macro:
+
+- `chart`
 
 ## `calc`
 
@@ -411,6 +416,97 @@ Example:
 // outputs NaE
 calc_exp:[exp=3 ^, author=Johnny, calc_exp_license_type=non_commercial]
 ```
+
+## `chart`
+
+Starting from version `2.4.0`, the `chart` **block** macro renders a line chart as an
+embedded `SVG` image. Unlike the other macros, it's a delimited block (not an inline macro),
+and it has no extra runtime dependencies — the SVG is built by the extension itself.
+
+A minimal chart looks like this:
+
+```asciidoc
+[chart,line]
+.Family & work expenses per month
+----
+x: Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
+Family: ,,,5568.09,5362.59,5633.96,,,,,,
+Work:   ,,,357.49,354.00,353.75,,,,,,
+----
+```
+
+The example below adds a currency `unit` and `point-labels=k` (see the attributes table):
+
+![Line chart sample](docs/images/chart-line-sample.png)
+
+### Body format
+
+The block body is line-oriented:
+
+- A line starting with `x:` (or `labels:`) defines the **x-axis labels**, comma-separated.
+  Exactly one such line is required; its number of entries is `N`.
+- Every other `Name: v1,v2,…,vN` line defines a **series** named `Name`. You can add as many
+  series as you want.
+- Values are positional and aligned to the x-axis labels. An **empty entry (or a non-numeric
+  one) is a gap**: no point is drawn there, and the line skips it. This lets you fill in months
+  as data arrives:
+
+  ```asciidoc
+  Family: ,,,5568.09,5362.59,5633.96,,,,,,
+  ```
+
+- Fewer than `N` entries → the remaining positions are gaps; more than `N` → the extras are
+  silently truncated.
+- Blank lines and lines starting with `//` are ignored.
+
+### Attribute substitution
+
+The block is a verbatim block, so you reference document attributes directly and the macro
+resolves them (AsciiDoc stores attribute names lower-cased; the macro looks them up
+accordingly, so mixed-case references like `{aprFamily}` work). An unresolved reference
+becomes empty — i.e. a gap. This makes charts "live" off your document data:
+
+```asciidoc
+:aprFamily: 5568.09
+:mayFamily: 5362.59
+:junFamily: 5633.96
+
+[chart,line]
+----
+x: Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
+Family: ,,,{aprFamily},{mayFamily},{junFamily},,,,,,
+----
+```
+
+### Options
+
+All of the following are optional block attributes with sensible defaults, so the minimal form
+above just works:
+
+| Attribute        | Default | Meaning                                                                                                                                                              |
+|------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `title` / `.Cap` | none    | Chart caption (the AsciiDoc block title)                                                                                                                              |
+| `width`          | `520`   | SVG width, in px                                                                                                                                                      |
+| `height`         | `300`   | SVG height, in px                                                                                                                                                     |
+| `ymin`           | auto    | Y-axis minimum (advisory: the axis still baselines at 0 and rounds to nice ticks)                                                                                     |
+| `ymax`           | auto    | Y-axis maximum (advisory: rounded up to a nice tick)                                                                                                                  |
+| `unit`           | none    | Suffix appended to the y-axis tick labels, e.g. `" €"`                                                                                                                |
+| `points`         | `true`  | Whether to draw a marker at each data point                                                                                                                           |
+| `point-labels`   | `none`  | Value labels on points: `none`, `full` (the exact amount), or `k` (amounts ≥ 1000 shown approximate as `~X.XXK`, 2 decimals; smaller values shown in full). Y-axis ticks are unaffected. |
+
+For example, the sample image above is produced with:
+
+```asciidoc
+[chart,line,unit=" €",point-labels=k]
+----
+x: Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
+Family: ,,,5568.09,5362.59,5633.96,,,,,,
+Work:   ,,,357.49,354.00,353.75,,,,,,
+----
+```
+
+Only the `line` chart type is supported for now. Any other type (e.g. `[chart,pie]`) logs a
+warning and renders nothing, without failing the build.
 
 ## List of breaking changes
 
