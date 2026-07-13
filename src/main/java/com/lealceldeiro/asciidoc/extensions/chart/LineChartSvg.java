@@ -1,6 +1,7 @@
 package com.lealceldeiro.asciidoc.extensions.chart;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public final class LineChartSvg {
   private static final int PAD_TOP = 24;
   private static final int PAD_BOTTOM = 40;
   private static final int TARGET_TICKS = 4;
+  private static final BigDecimal K_THRESHOLD = new BigDecimal("1000");
   private static final int LEGEND_COLUMNS = 4;
   private static final double LEGEND_COLUMN_WIDTH = 80.0;
   private static final double LEGEND_ROW_HEIGHT = 14.0;
@@ -74,7 +76,7 @@ public final class LineChartSvg {
       ChartSeries cs = series.get(s);
       String color = PALETTE.get(s % PALETTE.size());
       appendSeries(svg, cs, color, n, scale, plotLeft, plotRight, plotTop, plotBottom,
-                   options.points());
+                   options.points(), options.pointLabels());
     }
 
     // legend (top-right, inside plot)
@@ -116,9 +118,11 @@ public final class LineChartSvg {
 
   private static void appendSeries(StringBuilder svg, ChartSeries cs, String color, int n,
                                    AxisScale scale, double plotLeft, double plotRight,
-                                   double plotTop, double plotBottom, boolean points) {
+                                   double plotTop, double plotBottom, boolean points,
+                                   String pointLabels) {
     List<double[]> current = new ArrayList<>();
     List<double[]> allPoints = new ArrayList<>();
+    List<BigDecimal> allValues = new ArrayList<>();
     List<List<double[]>> segments = new ArrayList<>();
     int count = Math.min(n, cs.values().size());
     for (int i = 0; i < count; i++) {
@@ -134,6 +138,7 @@ public final class LineChartSvg {
       double y = yFor(v.doubleValue(), scale, plotTop, plotBottom);
       current.add(new double[] {x, y});
       allPoints.add(new double[] {x, y});
+      allValues.add(v);
     }
     if (current.size() >= 2) {
       segments.add(current);
@@ -153,6 +158,24 @@ public final class LineChartSvg {
            .append("\" r=\"3\" fill=\"").append(color).append("\"/>\n");
       }
     }
+    if (pointLabels != null && !"none".equalsIgnoreCase(pointLabels)) {
+      for (int i = 0; i < allPoints.size(); i++) {
+        double[] p = allPoints.get(i);
+        // sit the label above the point, but drop it below when it would clip the top edge
+        double labelY = (p[1] - 7 < plotTop + 8) ? p[1] + 14 : p[1] - 7;
+        svg.append("<text x=\"").append(fmt(p[0])).append("\" y=\"").append(fmt(labelY))
+           .append("\" font-size=\"9\" fill=\"#333\" text-anchor=\"middle\">")
+           .append(escape(formatPointLabel(allValues.get(i), pointLabels)))
+           .append("</text>\n");
+      }
+    }
+  }
+
+  private static String formatPointLabel(BigDecimal value, String mode) {
+    if ("k".equalsIgnoreCase(mode) && value.abs().compareTo(K_THRESHOLD) >= 0) {
+      return "~" + value.movePointLeft(3).setScale(2, RoundingMode.HALF_UP).toPlainString() + "K";
+    }
+    return value.toPlainString();
   }
 
   private static void appendLegend(StringBuilder svg, List<ChartSeries> series, double plotRight) {

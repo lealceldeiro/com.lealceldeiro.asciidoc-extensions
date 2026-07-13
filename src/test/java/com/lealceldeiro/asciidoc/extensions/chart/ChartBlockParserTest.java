@@ -47,12 +47,20 @@ class ChartBlockParserTest {
     ParsedChart def = ChartBlockParser.parse(body, Map.of(), Map.of());
     Assertions.assertEquals(520, def.options().width());
     Assertions.assertTrue(def.options().points());
+    Assertions.assertEquals("none", def.options().pointLabels());
 
     ParsedChart custom = ChartBlockParser.parse(
-        body, Map.of(), Map.of("width", "400", "unit", "€", "points", "false", "ymax", "9000"));
+        body, Map.of(),
+        Map.of("width", "400", "unit", "€", "points", "false", "ymax", "9000",
+               "point-labels", "K"));
     Assertions.assertEquals(400, custom.options().width());
     Assertions.assertEquals("€", custom.options().unit());
     Assertions.assertFalse(custom.options().points());
     Assertions.assertEquals(new BigDecimal("9000"), custom.options().yMax());
+    Assertions.assertEquals("k", custom.options().pointLabels(), "point-labels normalized to lowercase");
+
+    ParsedChart bogus = ChartBlockParser.parse(
+        body, Map.of(), Map.of("point-labels", "wat"));
+    Assertions.assertEquals("none", bogus.options().pointLabels(), "unknown mode -> none");
   }
 }

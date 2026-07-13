@@ -81,7 +81,20 @@ public final class ChartBlockParser {
     BigDecimal yMax = decimalAttr(attrs, "ymax");
     String unit = strAttr(attrs, "unit", d.unit());
     boolean points = !"false".equalsIgnoreCase(strAttr(attrs, "points", "true"));
-    return new ChartOptions(width, height, yMin, yMax, unit, points);
+    String pointLabels = pointLabelsAttr(attrs, d.pointLabels());
+    return new ChartOptions(width, height, yMin, yMax, unit, points, pointLabels);
+  }
+
+  private static String pointLabelsAttr(Map<String, Object> attrs, String fallback) {
+    Object v = attrs.get("point-labels");
+    if (v == null) {
+      return fallback;
+    }
+    String mode = String.valueOf(v).trim().toLowerCase(java.util.Locale.ROOT);
+    return switch (mode) {
+      case "none", "full", "k" -> mode;
+      default -> fallback;
+    };
   }
 
   private static int intAttr(Map<String, Object> attrs, String key, int fallback) {

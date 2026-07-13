@@ -98,9 +98,48 @@ class LineChartSvgTest {
   void honorsExplicitBoundsAndUnitSuffix() {
     List<String> x = List.of("Jan", "Feb");
     List<ChartSeries> series = List.of(new ChartSeries("S", Arrays.asList(bd("1"), bd("2"))));
-    ChartOptions opts = new ChartOptions(400, 200, bd("0"), bd("10"), "€", true);
+    ChartOptions opts = new ChartOptions(400, 200, bd("0"), bd("10"), "€", true, "none");
     String svg = LineChartSvg.render(x, series, opts);
     Assertions.assertTrue(svg.contains("width=\"400\""), "width honored");
     Assertions.assertTrue(svg.contains("10€") || svg.contains("10 €"), "top tick has unit");
+  }
+
+  @Test
+  void defaultDoesNotRenderPointValueLabels() {
+    List<String> x = List.of("Apr", "May", "Jun");
+    List<ChartSeries> series = List.of(
+        new ChartSeries("Family", Arrays.asList(bd("5568.09"), bd("5362.59"), bd("5633.96"))));
+    String svg = LineChartSvg.render(x, series, ChartOptions.defaults());
+    Assertions.assertFalse(svg.contains(">5568.09<"), "no exact-value label by default");
+    Assertions.assertFalse(svg.contains("~5.57K"), "no k-notation label by default");
+  }
+
+  @Test
+  void fullPointLabelsShowExactAmounts() {
+    List<String> x = List.of("Apr", "May", "Jun");
+    List<ChartSeries> series = List.of(
+        new ChartSeries("Work", Arrays.asList(bd("357.49"), bd("354.00"), bd("353.75"))));
+    ChartOptions opts = new ChartOptions(520, 300, null, null, null, true, "full");
+    String svg = LineChartSvg.render(x, series, opts);
+    Assertions.assertTrue(svg.contains(">357.49<"), "exact Apr amount labelled");
+    Assertions.assertTrue(svg.contains(">353.75<"), "exact Jun amount labelled");
+  }
+
+  @Test
+  void kPointLabelsApproximateThousandsAndKeepSmallValuesFull() {
+    List<String> x = List.of("Apr", "May", "Jun");
+    List<ChartSeries> family = List.of(
+        new ChartSeries("Family", Arrays.asList(bd("5568.09"), bd("5362.59"), bd("5633.96"))));
+    ChartOptions opts = new ChartOptions(520, 300, null, null, null, true, "k");
+    String svg = LineChartSvg.render(x, family, opts);
+    Assertions.assertTrue(svg.contains(">~5.57K<"), "5568.09 -> ~5.57K");
+    Assertions.assertTrue(svg.contains(">~5.36K<"), "5362.59 -> ~5.36K");
+    Assertions.assertTrue(svg.contains(">~5.63K<"), "5633.96 -> ~5.63K");
+
+    // values below 1000 stay in full even in k mode
+    List<ChartSeries> work = List.of(new ChartSeries("Work", Arrays.asList(bd("357.49"))));
+    String workSvg = LineChartSvg.render(List.of("Apr"), work, opts);
+    Assertions.assertTrue(workSvg.contains(">357.49<"), "357.49 stays full (< 1000)");
+    Assertions.assertFalse(workSvg.contains("K<"), "no K suffix for sub-1000 value");
   }
 }
