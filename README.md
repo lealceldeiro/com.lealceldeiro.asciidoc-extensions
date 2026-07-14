@@ -134,6 +134,32 @@ the results are being returned as `BigDecimal`s with scale 2.
 I plan to provide ways to customize that, but I haven't had the time yet.
 PRs are welcome.
 
+### Sign-based role
+
+Starting from version `2.4.1`, you can style the rendered result based on the sign of the
+calculation by providing the [role](https://docs.asciidoctor.org/asciidoc/latest/attributes/roles/)
+to apply for each case. The role names are entirely up to you (they map to your document's roles /
+your PDF theme); the macro is agnostic to them:
+
+| Attribute       | Applied when the result is |
+|-----------------|----------------------------|
+| `role_positive` | greater than zero          |
+| `role_negative` | less than zero             |
+| `role_zero`     | equal to zero              |
+
+```asciidoc
+// renders 150.00 with the `success-bg` role applied
+calc:sum[100, 50, role_positive=success-bg, role_negative=danger-bg]
+
+// renders -50.00 with the `danger-bg` role applied
+calc:sub[50, 100, role_positive=success-bg, role_negative=danger-bg]
+```
+
+Each attribute is optional and independent: when the attribute matching the result's sign is not
+provided (or is left blank), no role is applied. This lets you, for instance, highlight only
+negative results by providing `role_negative` alone. Likewise, no role is applied when the result
+is not a valid number (for example, a `NaN` result).
+
 ### Invalid arguments
 
 If the `calc` macro isn't provided with a valid operation, that's it,
@@ -378,6 +404,19 @@ calc_exp:[exp=0.471 + 0.49, author=Johnny, calc_exp_license_type=non_commercial,
 
 For more info about how to use the rounding_mode attribute, see section
 [`Rounding in calc`](README.md#rounding-in-calc). The usage is the same as in this macro.
+
+### Sign-based role in calc_exp
+
+Similar to `calc`, starting from version `2.4.1`, you can style the rendered result based on its
+sign by setting the `role_positive`, `role_negative`, and `role_zero` attributes, for example:
+
+```asciidoc
+// renders the result with `success-bg` when positive, or `danger-bg` when negative
+calc_exp:[exp=3 - 9, author=Johnny, calc_exp_license_type=non_commercial, role_positive=success-bg, role_negative=danger-bg]
+```
+
+For more info about how these attributes work, see section
+[`Sign-based role`](README.md#sign-based-role). The usage is the same as in this macro.
 
 ### Invalid values
 
