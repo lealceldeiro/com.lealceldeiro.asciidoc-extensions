@@ -20,6 +20,13 @@ public final class Macro {
     public static final String LICENSE_TYPE = "calc_exp_license_type";
 
     public static final String ROUNDING_MODE = "rounding_mode";
+
+    /** Role applied to the rendered result when it is greater than zero. */
+    public static final String ROLE_POSITIVE = "role_positive";
+    /** Role applied to the rendered result when it is less than zero. */
+    public static final String ROLE_NEGATIVE = "role_negative";
+    /** Role applied to the rendered result when it equals zero. */
+    public static final String ROLE_ZERO = "role_zero";
   }
 
   public static final class Value {

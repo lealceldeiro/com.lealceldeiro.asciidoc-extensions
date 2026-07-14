@@ -11,7 +11,6 @@ import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLogger;
 import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class CalcExpressionMacro extends InlineMacroProcessor implements Calc<Ca
 
     // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
     // https://www.rubydoc.info/gems/asciidoctor-pdf/Asciidoctor/PDF/Converter#convert_inline_quoted-instance_method
-    return createPhraseNode(parent, "quoted", result, Collections.emptyMap());
+    return createPhraseNode(parent, "quoted", result, Util.signRoleAttributes(result, attributes));
   }
 
   static Attributes getCalculationAttributes(Document parentDocument,

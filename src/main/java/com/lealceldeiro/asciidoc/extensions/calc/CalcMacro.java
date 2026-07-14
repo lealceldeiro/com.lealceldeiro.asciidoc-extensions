@@ -10,7 +10,6 @@ import com.lealceldeiro.asciidoc.extensions.calclogger.ExtensionLoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +39,8 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
 
     // https://docs.asciidoctor.org/pdf-converter/latest/extend/create-converter/#override-a-method
     // https://www.rubydoc.info/gems/asciidoctor-pdf/Asciidoctor/PDF/Converter#convert_inline_quoted-instance_method
-    return createPhraseNode(parent, "quoted", calcResult, Collections.emptyMap());
+    return createPhraseNode(parent, "quoted", calcResult,
+                            Util.signRoleAttributes(calcResult, attributes));
   }
 
   @Override
@@ -91,6 +91,15 @@ public class CalcMacro extends InlineMacroProcessor implements Calc<Map<String, 
       configAttributeCount++;
     }
     if (attributes.containsKey(Macro.Key.ROUNDING_MODE)) {
+      configAttributeCount++;
+    }
+    if (attributes.containsKey(Macro.Key.ROLE_POSITIVE)) {
+      configAttributeCount++;
+    }
+    if (attributes.containsKey(Macro.Key.ROLE_NEGATIVE)) {
+      configAttributeCount++;
+    }
+    if (attributes.containsKey(Macro.Key.ROLE_ZERO)) {
       configAttributeCount++;
     }
     return configAttributeCount;
